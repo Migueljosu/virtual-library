@@ -1,0 +1,19 @@
+{
+  "name": "virtual-library",
+  "version": "1.0.0",
+  "description": "Este projeto é uma biblioteca virtual que permite aos usuários explorar livros, receber recomendações personalizadas e interagir com um chatbot.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:frontend": "npm run start --prefix frontend",
+    "start:backend": "nodemon backend/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "nodemon": "^3.1.9"
+  }
+}
