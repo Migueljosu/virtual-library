@@ -1,3 +1,7 @@
+/* slick-carousel */
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,4 +14,45 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+/* Adiciona o cursor de mão para botões e links no hover */
+button:hover,
+a:hover {
+  cursor: pointer;
+}
+
+/* Habilitar rolagem suave para toda a página */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Garantir que o scroll seja visível e que não haja interferência */
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0; /* Impede o scroll horizontal */
+}
+
+/* Estilizar a barra de rolagem */
+::-webkit-scrollbar {
+  width: 10px; /* Largura da barra de rolagem */
+  height: 10px; /* Altura da barra de rolagem horizontal */
+}
+
+/* Estilizar o fundo da barra de rolagem */
+::-webkit-scrollbar-track {
+  background-color: white; /* Cor de fundo da barra de rolagem */
+  border-radius: 10px; /* Arredondamento das bordas */
+}
+
+/* Estilizar a parte que o usuário arrasta (o "polegar") */
+::-webkit-scrollbar-thumb {
+  background-color: #8b4513a8; /* Cor castanha do "polegar" */
+  border-radius: 10px; /* Arredondamento das bordas */
+  border: 2px solid white; /* Adiciona uma borda branca ao "polegar" */
+}
+
+/* Estilizar o "polegar" quando ele está sendo ativado */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a0522d; /* Cor mais clara quando o usuário passar o mouse */
 }

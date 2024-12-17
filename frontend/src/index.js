@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import './styles/tailwind.css'; // Importa o Tailwind CSS
+import './styles/output.css'; // Importa o CSS gerado pelo Tailwind
+import 'animate.css';  // Importação global do animate.css
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
