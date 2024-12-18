@@ -1,28 +1,16 @@
 import React, { useState } from "react";
-import logo from "../assets/images/logo.svg"; // ajuste o caminho conforme necessário
-import { Link } from 'react-scroll'; // Importando o Link do react-scroll
-
-import SearchBar from './SearchBar';
-import NewBooks from './NewBooks';
-import PopularBooks from './PopularBooks';
-import BlogArticles from './BlogArticles';
-import About from './About';
-import Events from './Events';
-import Testimonials from './Testimonials';
-import Contact from './Contact';
-import Newsletter from './Newsletter';
+import logo from "../assets/images/logo.svg";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Função para alternar o estado do menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Função para fechar o menu ao clicar em um item
   const handleMenuItemClick = () => {
-    setIsMenuOpen(false); // Fecha o menu
+    setIsMenuOpen(false); // Fecha o menu após clique
   };
 
   return (
@@ -37,14 +25,13 @@ const Header = () => {
           />
         </div>
 
-        {/* Menu Toggle for Mobile */}
+        {/* Mobile Menu Toggle */}
         <div className="lg:hidden flex items-center z-50">
           <button
             onClick={toggleMenu}
             className="text-wood-brown focus:outline-none z-50 relative"
           >
             {isMenuOpen ? (
-              // Ícone de "X" para fechar o menu
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -60,7 +47,6 @@ const Header = () => {
                 />
               </svg>
             ) : (
-              // Ícone de hambúrguer para abrir o menu
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -79,7 +65,7 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Menu */}
+        {/* Menu Links */}
         <div
           className={`${
             isMenuOpen
@@ -87,104 +73,44 @@ const Header = () => {
               : "hidden"
           } lg:flex lg:space-x-8 lg:static lg:bg-transparent lg:flex-row lg:space-y-0`}
         >
+          {/* Seções da página inicial */}
+          {[
+            { id: "search", label: "Search" },
+            { id: "new-books", label: "New Books" },
+            { id: "popular-books", label: "Popular Books" },
+            { id: "blog-articles", label: "Blog" },
+            { id: "about", label: "About" },
+            { id: "events", label: "Events" },
+            { id: "testimonials", label: "Testimonials" },
+            { id: "contact", label: "Contact" },
+            { id: "newsletter", label: "Newsletter" },
+          ].map((section) => (
+            <a
+              href={`#${section.id}`}
+              key={section.id}
+              onClick={handleMenuItemClick}
+              className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
+                isMenuOpen ? "text-white" : "text-wood-brown"
+              }`}
+            >
+              {section.label}
+            </a>
+          ))}
+
+          {/* Rotas para Login e Sign Up */}
           <Link
-            to="search"
-            smooth={true}
-            duration={1000} // Aumenta a duração do scroll para ser mais suave
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
+            to="/login"
+            onClick={handleMenuItemClick}
+            className="text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg text-wood-brown"
           >
-            Search
+            Login
           </Link>
           <Link
-            to="new-books"
-            smooth={true}
-            duration={1000}
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
+            to="/create-account"
+            onClick={handleMenuItemClick}
+            className="text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg text-wood-brown"
           >
-            New Books
-          </Link>
-          <Link
-            to="popular-books"
-            smooth={true}
-            duration={1000}
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
-          >
-            Popular Books
-          </Link>
-          <Link
-            to="blog-articles"
-            smooth={true}
-            duration={1000}
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
-          >
-            Blog
-          </Link>
-          <Link
-            to="about"
-            smooth={true}
-            duration={1000}
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
-          >
-            About
-          </Link>
-          <Link
-            to="events"
-            smooth={true}
-            duration={1000}
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
-          >
-            Events
-          </Link>
-          <Link
-            to="testimonials"
-            smooth={true}
-            duration={1000}
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
-          >
-            Testimonials
-          </Link>
-          <Link
-            to="contact"
-            smooth={true}
-            duration={1000}
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
-          >
-            Contact
-          </Link>
-          <Link
-            to="newsletter"
-            smooth={true}
-            duration={1000}
-            onClick={handleMenuItemClick} // Fecha o menu ao clicar no item
-            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
-              isMenuOpen ? "text-white" : "text-wood-brown"
-            }`}
-          >
-            Newsletter
+            Sign Up
           </Link>
         </div>
       </nav>

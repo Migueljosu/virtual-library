@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router } from "react-router-dom"; // Importe o Router
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom"; // Importando Routes no lugar de Switch
 import { FaArrowUp, FaHandsHelping } from "react-icons/fa"; // Importando ícones
-import Home from "./pages/Home";
+import Home from "./pages/Home"; // Página Home
+import Login from "./pages/Login"; // Página Login
+import CreateAccount from "./pages/CreateAccount"; // Página CreateAccount
+import WriterDashboard from "./pages/WriterDashboard";
+import ReaderDashboard from "./pages/ReaderDashboard"; // Certifique-se de importar a nova página
+
 
 const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   // Função para monitorar a rolagem da página
   const handleScroll = () => {
-    if (window.scrollY > 300) { // Mostrar o botão após 300px de rolagem
+    if (window.scrollY > 300) {
+      // Mostrar o botão após 300px de rolagem
       setIsVisible(true);
     } else {
       setIsVisible(false);
@@ -46,7 +52,6 @@ const ScrollToTopButton = () => {
   );
 };
 
-
 const DonationButton = () => (
   <div className="relative">
     <a
@@ -61,19 +66,23 @@ const DonationButton = () => (
   </div>
 );
 
-
 const App = () => {
   return (
     <Router>
-      {" "}
-      {/* Envolva sua aplicação com o Router */}
       <div>
-        {/* O Header será renderizado dentro do Home */}
-        <Home />
+        {/* Navegação entre as páginas */}
+        <Routes>
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/create-account" element={<CreateAccount />} />
+          <Route path="/writer-dashboard" element={<WriterDashboard />} />
+          <Route path="/reader-dashboard" element={<ReaderDashboard />} />
+          <Route path="/" element={<Home />} /> {/* Página padrão */}
+        </Routes>
+
+        {/* Botões fixos na tela */}
         <ScrollToTopButton />
         <DonationButton />
-
-
       </div>
     </Router>
   );
