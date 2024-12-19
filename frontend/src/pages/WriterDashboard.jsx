@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import logo from "../assets/images/logo.svg";
-import { Link } from "react-router-dom";
 import { scroller } from "react-scroll"; // Importa a função de rolagem da biblioteca react-scroll
 import WriterBooks from "../components/WriterBooks";
 import WriterStats from "../components/WriterStats";
@@ -12,15 +11,18 @@ import SearchBar from "../components/SearchBar";
 import PopularBooks from "../components/PopularBooks";
 import Footer from "../components/Footer";
 import Chatbot from "../components/Chatbot"; // Importa o componente do Chatbot
-import { FaRobot } from "react-icons/fa"; // Corretamente importar o FaRobot
+import { FaRobot, FaSignOutAlt } from "react-icons/fa"; // Corretamente importar o FaRobot
+import { useNavigate } from "react-router-dom"; // Navegação
 
 const WriterDashboard = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [loadingLogout, setLoadingLogout] = useState(false); // Estado para controle do loader
+  const navigate = useNavigate(); // Hook de navegação
 
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -37,10 +39,14 @@ const WriterDashboard = () => {
   };
 
   const handleLogout = () => {
-    // Implementar lógica de logout aqui (por exemplo, limpar o estado do usuário ou redirecionar para uma página de login)
-    console.log("Logout executado");
-    // Redirecionar para a página de login
-    window.location.href = "/login";
+    setLoadingLogout(true); // Ativa o estado de loading
+
+    setTimeout(() => {
+      localStorage.removeItem("user"); // Remove o usuário do localStorage
+      setLoadingLogout(false); // Desativa o estado de loading
+      window.location.reload(); // Força a atualização da página
+      navigate("/login"); // Redireciona para a página de login
+    }, 2000); // Atraso de 2 segundos para mostrar o loader
   };
 
   return (
@@ -106,7 +112,7 @@ const WriterDashboard = () => {
                 : "hidden"
             } lg:flex lg:space-x-8 lg:static lg:bg-transparent lg:flex-row lg:space-y-0`}
           >
-            {[
+            {[ 
               { id: "statistics", label: "Statistics" },
               { id: "post-book", label: "Post Book" },
               { id: "blog", label: "Blog" },
@@ -115,15 +121,10 @@ const WriterDashboard = () => {
               { id: "create-new-book", label: "My Books" },
               { id: "book-library", label: "Book Library" },
               { id: "search", label: "Search" },
-              { id: "logout", label: "Logout", action: handleLogout },
             ].map((section) => (
               <button
                 key={section.id}
-                onClick={() =>
-                  section.action
-                    ? section.action()
-                    : handleMenuItemClick(section.id)
-                }
+                onClick={() => handleMenuItemClick(section.id)}
                 className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
                   isMenuOpen ? "text-white" : "text-wood-brown"
                 }`}
@@ -131,6 +132,21 @@ const WriterDashboard = () => {
                 {section.label}
               </button>
             ))}
+            {/* Botão de Logout */}
+            <button
+              onClick={handleLogout}
+              className="text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg text-wood-brown"
+              disabled={loadingLogout}
+            >
+              {loadingLogout ? (
+                <div className="loader spinner-border animate-spin h-5 w-5 border-t-2 border-yellow-400"></div> // Loader
+              ) : (
+                <>
+                  <FaSignOutAlt className="inline mr-2" />
+                  Logout
+                </>
+              )}
+            </button>
           </div>
         </nav>
       </header>

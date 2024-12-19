@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { FaUpload, FaFileAlt, FaRegClock, FaUser, FaTag, FaDollarSign, FaCalendar } from "react-icons/fa"; // Ícones
+import {
+  FaUpload,
+  FaFileAlt,
+  FaRegClock,
+  FaUser,
+  FaTag,
+  FaDollarSign,
+  FaCalendar,
+} from "react-icons/fa"; // Ícones
 
 const CreateNewBook = () => {
   const [title, setTitle] = useState("");
@@ -17,7 +25,17 @@ const CreateNewBook = () => {
 
   const handleCreate = (e) => {
     e.preventDefault();
-    console.log("Creating new book:", { title, description, author, genre, status, isFree, price, publicationDate, file });
+    console.log("Creating new book:", {
+      title,
+      description,
+      author,
+      genre,
+      status,
+      isFree,
+      price,
+      publicationDate,
+      file,
+    });
     // Adicionar lógica para salvar o livro, como enviar para o backend
   };
 
@@ -50,6 +68,9 @@ const CreateNewBook = () => {
     <form onSubmit={handleCreate} className="bg-white p-6 shadow-md rounded-lg">
       {/* Título do Livro */}
       <div className="mb-4">
+        <h2 className="text-xl font-semibold text-wood-brown mb-4">
+          Create a New Book
+        </h2>
         <label className="block text-sm font-semibold text-wood-brown">
           <FaTag className="inline-block mr-2" />
           Book Title
@@ -119,7 +140,9 @@ const CreateNewBook = () => {
 
       {/* Status do Livro */}
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-wood-brown">Status</label>
+        <label className="block text-sm font-semibold text-wood-brown">
+          Status
+        </label>
         <div className="flex items-center space-x-4">
           <label className="flex items-center">
             <input
@@ -202,10 +225,15 @@ const CreateNewBook = () => {
           <FaUpload className="inline-block mr-2" />
           Upload Cover Image
         </label>
-        <div {...getRootProps()} className="border-dashed border-2 border-gray-300 p-4 rounded-md">
+        <div
+          {...getRootProps()}
+          className="border-dashed border-2 border-gray-300 p-4 rounded-md"
+        >
           <input {...getInputProps()} />
           {!file ? (
-            <p className="text-center text-gray-600">Drag and drop an image or click to select a file</p>
+            <p className="text-center text-gray-600">
+              Drag and drop an image or click to select a file
+            </p>
           ) : (
             <div className="flex items-center space-x-4">
               {file.type.startsWith("image/") ? (
@@ -234,10 +262,15 @@ const CreateNewBook = () => {
           <FaUpload className="inline-block mr-2" />
           Upload Book File (PDF, EPUB, etc.)
         </label>
-        <div {...getRootProps()} className="border-dashed border-2 border-gray-300 p-4 rounded-md">
+        <div
+          {...getRootProps()}
+          className="border-dashed border-2 border-gray-300 p-4 rounded-md"
+        >
           <input {...getInputProps()} />
           {!file ? (
-            <p className="text-center text-gray-600">Drag and drop your book file here</p>
+            <p className="text-center text-gray-600">
+              Drag and drop your book file here
+            </p>
           ) : (
             <div className="flex items-center space-x-4">
               <FaFileAlt className="text-2xl text-gray-600" />

@@ -1,40 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import axiosInstance from "../utils/axiosInstance";
+import backgroundImage from "../assets/images/books-1842306_1280.jpg";
 import { Link } from "react-router-dom";
-import backgroundImage from "../assets/images/books-2596809_1280.jpg"; // Importe a imagem
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // Limpa erros anteriores
+    setLoading(true);
 
-    if (!email || !password) {
-      setError("Please fill in all fields.");
-      return;
+    try {
+      const response = await axiosInstance.post(
+        "/api/users/login",
+        { email, password },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      // Armazenando o token no localStorage
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      // Exibindo mensagem de sucesso
+      toast.success("Login bem-sucedido!");
+
+      const { role } = response.data.user; // Obtendo o papel do usuário
+
+      // Timeout para garantir que o navegador entenda o estado do token
+      setTimeout(() => {
+        // Forçando uma recarga da página para que o redirecionamento aconteça com o estado correto
+        window.location.reload();
+      }, 1000); // 1 segundo de delay antes de recarregar
+
+      // Você pode remover a parte do redirecionamento imediato, pois a página será recarregada
+      // Isso vai permitir que o uso do localStorage seja atualizado após o login
+    } catch (err) {
+      console.error("Erro no login:", err);
+      toast.error(err.response?.data?.message || "Erro ao fazer login!");
+    } finally {
+      setLoading(false);
     }
-
-    // Simulação de login (substituir com API real)
-    console.log("Login submitted with:", { email, password });
-
-    if (email !== "user@example.com" || password !== "password123") {
-      setError("Invalid email or password.");
-      return;
-    }
-
-    alert("Login successful!");
   };
-
   return (
     <div
-      className="flex items-center justify-center min-h-screen bg-cover bg-center"
+      className="min-h-screen bg-cover bg-center flex items-center justify-center"
       style={{
-        backgroundImage: `url(${backgroundImage})`, // Usando a imagem importada
+        backgroundImage: `url(${backgroundImage})`,
       }}
     >
-      {/* Link estilizado para "Voltar para Home" */}
       <div className="absolute top-6 left-6">
         <Link
           to="/"
@@ -58,16 +76,17 @@ const Login = () => {
         </Link>
       </div>
 
-      <div className="bg-white bg-opacity-90 shadow-lg rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-wood-brown mb-6">Login</h2>
-        {error && (
-          <div className="mb-4 text-sm text-red-600 bg-red-100 p-2 rounded">
-            {error}
-          </div>
-        )}
+      <div className="container mx-auto max-w-md p-6 bg-white bg-opacity-75 shadow-lg rounded-lg">
+        <h2 className="text-2xl font-bold text-center text-wood-brown mb-6">
+          Login
+        </h2>
+
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold text-wood-brown">
+            <label
+              htmlFor="email"
+              className="block text-sm font-semibold text-wood-brown"
+            >
               Email:
             </label>
             <input
@@ -82,7 +101,10 @@ const Login = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-semibold text-wood-brown">
+            <label
+              htmlFor="password"
+              className="block text-sm font-semibold text-wood-brown"
+            >
               Password:
             </label>
             <input
@@ -99,17 +121,23 @@ const Login = () => {
           <button
             type="submit"
             className="w-full py-2 mt-4 bg-wood-brown text-white rounded-md hover:bg-yellow-400 transition duration-300"
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         <div className="mt-4 text-center">
-          <Link to="/create-account" className="text-sm text-yellow-400 hover:text-yellow-500">
+          <Link
+            to="/create-account"
+            className="text-sm text-yellow-400 hover:text-yellow-500"
+          >
             Don't have an account? Create one here.
           </Link>
         </div>
       </div>
+
+      <ToastContainer />
     </div>
   );
 };

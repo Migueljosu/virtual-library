@@ -74,8 +74,7 @@ const Header = () => {
           } lg:flex lg:space-x-8 lg:static lg:bg-transparent lg:flex-row lg:space-y-0`}
         >
           {/* Seções da página inicial */}
-          {[
-            { id: "search", label: "Search" },
+          {[{ id: "search", label: "Search" },
             { id: "new-books", label: "New Books" },
             { id: "popular-books", label: "Popular Books" },
             { id: "blog-articles", label: "Blog" },
@@ -101,14 +100,22 @@ const Header = () => {
           <Link
             to="/login"
             onClick={handleMenuItemClick}
-            className="text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg text-wood-brown"
+            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
+              isMenuOpen
+                ? "bg-white text-wood-brown shadow-md"
+                : "text-wood-brown"
+            }`}
           >
             Login
           </Link>
           <Link
             to="/create-account"
             onClick={handleMenuItemClick}
-            className="text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg text-wood-brown"
+            className={`text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg ${
+              isMenuOpen
+                ? "bg-white text-wood-brown shadow-md"
+                : "text-wood-brown"
+            }`}
           >
             Sign Up
           </Link>

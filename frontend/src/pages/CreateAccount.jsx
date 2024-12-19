@@ -1,33 +1,79 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Usando react-router-dom para navegação
-import backgroundImage from "../assets/images/books-1842306_1280.jpg"; // Importe a imagem
+import { Link, useNavigate } from "react-router-dom"; // Importando useNavigate
+import backgroundImage from "../assets/images/books-1842306_1280.jpg";
+import { toast, ToastContainer } from "react-toastify"; // Importando o toastify
+import "react-toastify/dist/ReactToastify.css"; // Importando o CSS
+import axiosInstance from "../utils/axiosInstance";
 
 const CreateAccount = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [accountType, setAccountType] = useState("Reader"); // Adicionando o tipo de conta
+  const [accountType, setAccountType] = useState("Reader");
+  const [loading, setLoading] = useState(false);
 
-  const handleCreateAccount = (e) => {
+  const navigate = useNavigate(); // Hook para navegação
+
+  const handleCreateAccount = async (e) => {
     e.preventDefault();
-    // Lógica para criar conta (verificação, backend, etc)
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!"); // Exibe a mensagem de erro
       return;
     }
-    console.log("Account created with:", { name, email, password, accountType });
-    // Aqui você pode enviar os dados ao backend
+
+    setLoading(true);
+
+    try {
+      // Alterado para o endpoint correto "/api/users/register"
+      const response = await axiosInstance.post(
+        "/api/users/register",
+        {
+          name,
+          email,
+          password,
+          role: accountType,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Mensagem de sucesso
+      toast.success("Account created successfully!");
+
+      // Limpar os campos do formulário
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setAccountType("Reader");
+
+      // Redirecionar para a página de login
+      setTimeout(() => {
+        navigate("/login"); // Atraso de 1 segundo antes de redirecionar
+      }, 1000); // O redirecionamento acontece após 1 segundo
+    } catch (err) {
+      // Exibe mensagem de erro
+      toast.error(
+        err.response?.data?.message ||
+          "Error creating account. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div
       className="min-h-screen bg-cover bg-center flex items-center justify-center"
       style={{
-        backgroundImage: `url(${backgroundImage})`, // Usando a imagem importada
+        backgroundImage: `url(${backgroundImage})`,
       }}
     >
-      {/* Link estilizado para "Voltar para Home" */}
       <div className="absolute top-6 left-6">
         <Link
           to="/"
@@ -52,10 +98,16 @@ const CreateAccount = () => {
       </div>
 
       <div className="container mx-auto max-w-md p-6 bg-white bg-opacity-75 shadow-lg rounded-lg">
-        <h2 className="text-2xl font-bold text-center text-wood-brown mb-6">Create Account</h2>
+        <h2 className="text-2xl font-bold text-center text-wood-brown mb-6">
+          Create Account
+        </h2>
+
         <form onSubmit={handleCreateAccount}>
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-semibold text-wood-brown">
+            <label
+              htmlFor="name"
+              className="block text-sm font-semibold text-wood-brown"
+            >
               Full Name:
             </label>
             <input
@@ -70,7 +122,10 @@ const CreateAccount = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold text-wood-brown">
+            <label
+              htmlFor="email"
+              className="block text-sm font-semibold text-wood-brown"
+            >
               Email:
             </label>
             <input
@@ -85,7 +140,10 @@ const CreateAccount = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-semibold text-wood-brown">
+            <label
+              htmlFor="password"
+              className="block text-sm font-semibold text-wood-brown"
+            >
               Password:
             </label>
             <input
@@ -100,7 +158,10 @@ const CreateAccount = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="confirm-password" className="block text-sm font-semibold text-wood-brown">
+            <label
+              htmlFor="confirm-password"
+              className="block text-sm font-semibold text-wood-brown"
+            >
               Confirm Password:
             </label>
             <input
@@ -115,7 +176,10 @@ const CreateAccount = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="account-type" className="block text-sm font-semibold text-wood-brown">
+            <label
+              htmlFor="account-type"
+              className="block text-sm font-semibold text-wood-brown"
+            >
               Account Type:
             </label>
             <select
@@ -132,16 +196,23 @@ const CreateAccount = () => {
           <button
             type="submit"
             className="w-full py-2 mt-4 bg-wood-brown text-white rounded-md hover:bg-yellow-400 transition duration-300"
+            disabled={loading}
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
         <div className="mt-4 text-center">
-          <Link to="/login" className="text-sm text-yellow-400 hover:text-yellow-500">
+          <Link
+            to="/login"
+            className="text-sm text-yellow-400 hover:text-yellow-500"
+          >
             Already have an account? Login here.
           </Link>
         </div>
       </div>
+
+      {/* Toast Container para exibir as mensagens */}
+      <ToastContainer />
     </div>
   );
 };

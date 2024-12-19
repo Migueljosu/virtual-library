@@ -1,86 +1,115 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom"; // Importando Routes no lugar de Switch
-import { FaArrowUp, FaHandsHelping } from "react-icons/fa"; // Importando ícones
-import Home from "./pages/Home"; // Página Home
-import Login from "./pages/Login"; // Página Login
-import CreateAccount from "./pages/CreateAccount"; // Página CreateAccount
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { FaArrowUp, FaHandsHelping } from "react-icons/fa";
+import Home from "./pages/Home";
+import LoginPage from "./pages/Login";
+import CreateAccount from "./pages/CreateAccount";
+import ReaderDashboard from "./pages/ReaderDashboard";
 import WriterDashboard from "./pages/WriterDashboard";
-import ReaderDashboard from "./pages/ReaderDashboard"; // Certifique-se de importar a nova página
-
+import AdminPage from "./pages/AdminPage";
+import { checkUserRole } from "./utils/auth"; 
 
 const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
 
-  // Função para monitorar a rolagem da página
   const handleScroll = () => {
-    if (window.scrollY > 300) {
-      // Mostrar o botão após 300px de rolagem
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
+    setIsVisible(window.scrollY > 300);
   };
 
   useEffect(() => {
-    // Adiciona o evento de scroll ao componente
     window.addEventListener("scroll", handleScroll);
-
-    // Remove o evento de scroll quando o componente for desmontado
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" }); // Função para rolar até o topo suavemente
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     isVisible && (
-      <div className="relative">
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-5 right-10 bg-yellow-400 text-white p-4 rounded-full shadow-lg hover:bg-yellow-500 transition duration-300 flex items-center justify-center"
-        >
-          <FaArrowUp className="text-2xl" />
-          <span className="absolute bottom-12 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity duration-300">
-            Scroll to Top
-          </span>
-        </button>
-      </div>
+      <button
+        onClick={scrollToTop}
+        className="fixed bottom-5 right-10 bg-yellow-400 text-white p-4 rounded-full shadow-lg hover:bg-yellow-500 transition duration-300"
+      >
+        <FaArrowUp className="text-2xl" />
+      </button>
     )
   );
 };
 
 const DonationButton = () => (
-  <div className="relative">
-    <a
-      href="#donate" // A ID da seção de doações ou URL para página de doações
-      className="fixed bottom-20 right-10 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition duration-300 flex items-center justify-center"
-    >
-      <FaHandsHelping className="text-2xl" />
-      <span className="absolute bottom-12 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity duration-300">
-        Donate
-      </span>
-    </a>
-  </div>
+  <a
+    href="#donate"
+    className="fixed bottom-20 right-10 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition duration-300"
+  >
+    <FaHandsHelping className="text-2xl" />
+  </a>
 );
 
 const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && localStorage.getItem("token")) {
+      setIsAuthenticated(true);
+      setRole(user.role);
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);
+
   return (
     <Router>
       <div>
-        {/* Navegação entre as páginas */}
         <Routes>
-          <Route path="/home" element={<Home />} />
-          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                <Navigate to={`/${role}-dashboard`} />
+              ) : (
+                <Home />
+              )
+            }
+          />
+          <Route path="/login" element={isAuthenticated ? <Navigate to={`/${role}-dashboard`} /> : <LoginPage />} />
           <Route path="/create-account" element={<CreateAccount />} />
-          <Route path="/writer-dashboard" element={<WriterDashboard />} />
-          <Route path="/reader-dashboard" element={<ReaderDashboard />} />
-          <Route path="/" element={<Home />} /> {/* Página padrão */}
+          <Route
+            path="/reader-dashboard"
+            element={
+              isAuthenticated && checkUserRole("reader") ? (
+                <ReaderDashboard />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/writer-dashboard"
+            element={
+              isAuthenticated && checkUserRole("writer") ? (
+                <WriterDashboard />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin-dashboard"
+            element={
+              isAuthenticated && checkUserRole("admin") ? (
+                <AdminPage />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
-
-        {/* Botões fixos na tela */}
         <ScrollToTopButton />
         <DonationButton />
       </div>

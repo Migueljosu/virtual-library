@@ -9,37 +9,48 @@ import Events from "../components/Events";
 import SearchBar from "../components/SearchBar";
 import RecommendedBooks from "../components/RecommendedBooks";
 import Footer from "../components/Footer";
-import Chatbot from '../components/Chatbot'; // Importa o componente do Chatbot
-import { FaRobot } from 'react-icons/fa'; // Corretamente importar o FaRobot
+import Chatbot from "../components/Chatbot";
+import { FaRobot, FaSignOutAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const ReaderDashboard = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [loadingLogout, setLoadingLogout] = useState(false); // Estado para controlar o loader de logout
+  const navigate = useNavigate();
 
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const handleMenuItemClick = (id) => {
-    setIsMenuOpen(false); // Fecha o menu após clique
-    // Faz a rolagem suave até o elemento desejado
+    setIsMenuOpen(false);
     scroller.scrollTo(id, {
       duration: 800,
       smooth: true,
-      offset: -70, // Ajuste para o menu fixo
+      offset: -70,
     });
+  };
+
+  const handleLogout = () => {
+    setLoadingLogout(true); // Ativa o estado de loading
+
+    setTimeout(() => {
+      localStorage.removeItem("user"); // Remove o usuário do localStorage
+      setLoadingLogout(false); // Desativa o estado de loading
+      window.location.reload(); // Força a atualização da página
+      navigate("/login"); // Redireciona para a página de login após a atualização
+    }, 2000); // Atraso de 2 segundos para mostrar o loader
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Cabeçalho Fixo */}
       <header className="bg-white text-wood-brown fixed top-0 left-0 w-full z-50 shadow-md">
         <nav className="container mx-auto flex justify-between items-center p-4 relative">
-          {/* Logo */}
           <div className="flex items-center">
             <img
               src={logo}
@@ -49,7 +60,6 @@ const ReaderDashboard = () => {
             <h1 className="text-2xl font-bold">Reader Dashboard</h1>
           </div>
 
-          {/* Mobile Menu Toggle */}
           <div className="lg:hidden flex items-center z-50">
             <button
               onClick={toggleMenu}
@@ -89,7 +99,6 @@ const ReaderDashboard = () => {
             </button>
           </div>
 
-          {/* Menu Links */}
           <div
             className={`${
               isMenuOpen
@@ -97,21 +106,15 @@ const ReaderDashboard = () => {
                 : "hidden"
             } lg:flex lg:space-x-8 lg:static lg:bg-transparent lg:flex-row lg:space-y-0`}
           >
-            {[{
-              id: "statistics", label: "Statistics"
-            }, {
-              id: "reader-books", label: "Reader Books"
-            }, {
-              id: "recommended-books", label: "Recommended Books"
-            }, {
-              id: "blog", label: "Blog"
-            }, {
-              id: "events", label: "Events"
-            }, {
-              id: "contact", label: "Contact"
-            }, {
-              id: "search", label: "Search"
-            }].map((section) => (
+            {[ 
+              { id: "statistics", label: "Statistics" },
+              { id: "reader-books", label: "Reader Books" },
+              { id: "recommended-books", label: "Recommended Books" },
+              { id: "blog", label: "Blog" },
+              { id: "events", label: "Events" },
+              { id: "contact", label: "Contact" },
+              { id: "search", label: "Search" },
+            ].map((section) => (
               <button
                 key={section.id}
                 onClick={() => handleMenuItemClick(section.id)}
@@ -122,13 +125,28 @@ const ReaderDashboard = () => {
                 {section.label}
               </button>
             ))}
+            {/* Botão de Logout */}
+            <button
+              onClick={handleLogout}
+              className="text-xl lg:text-lg transition duration-300 transform hover:scale-110 hover:text-yellow-400 hover:drop-shadow-lg text-wood-brown"
+              disabled={loadingLogout}
+            >
+              {loadingLogout ? (
+                <div className="loader spinner-border animate-spin h-5 w-5 border-t-2 border-yellow-400"></div> // Loader
+              ) : (
+                <>
+                  <FaSignOutAlt className="inline mr-2" />
+                  Logout
+                </>
+              )}
+            </button>
           </div>
         </nav>
       </header>
 
       {/* Conteúdo Principal */}
       <main className="container mx-auto p-6 pt-36">
-        {/* Secção de Estatísticas */}
+        {/* Seção de Estatísticas */}
         <section id="statistics" className="mb-8">
           <h2 className="text-xl font-semibold text-wood-brown mb-4">
             Your Statistics
@@ -136,7 +154,7 @@ const ReaderDashboard = () => {
           <ReaderStats />
         </section>
 
-        {/* Secção de Livros do Leitor */}
+        {/* Seção de Livros do Leitor */}
         <section id="reader-books" className="mb-8">
           <h2 className="text-xl font-semibold text-wood-brown mb-4">
             Your Books
@@ -144,7 +162,7 @@ const ReaderDashboard = () => {
           <ReaderBooks />
         </section>
 
-        {/* Secção de Livros Recomendados */}
+        {/* Seção de Livros Recomendados */}
         <section id="recommended-books" className="mb-8">
           <h2 className="text-xl font-semibold text-wood-brown mb-4">
             Recommended Books
@@ -152,7 +170,7 @@ const ReaderDashboard = () => {
           <RecommendedBooks />
         </section>
 
-        {/* Secção de Blog */}
+        {/* Seção de Blog */}
         <section id="blog" className="mb-8">
           <h2 className="text-xl font-semibold text-wood-brown mb-4">
             Your Blog
@@ -160,7 +178,7 @@ const ReaderDashboard = () => {
           <BlogArticles />
         </section>
 
-        {/* Secção de Eventos */}
+        {/* Seção de Eventos */}
         <section id="events" className="mb-8">
           <h2 className="text-xl font-semibold text-wood-brown mb-4">
             Upcoming Events
@@ -176,7 +194,7 @@ const ReaderDashboard = () => {
           <SearchBar />
         </section>
 
-        {/* Secção de Contato */}
+        {/* Seção de Contato */}
         <section id="contact" className="mb-8">
           <h2 className="text-xl font-semibold text-wood-brown mb-4">
             Contact Us

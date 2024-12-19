@@ -24,7 +24,7 @@ module.exports = {
         allowNull: false,
       },
       role: {
-        type: Sequelize.ENUM("reader", "writer"),
+        type: Sequelize.ENUM("reader", "writer","admin"),
         defaultValue: "reader",
         allowNull: false,
       },
@@ -37,10 +37,22 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW,
       },
+      profile_picture: {
+        type: Sequelize.STRING(255),
+        allowNull: true,
+      },
+      is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+        allowNull: false,
+      },
+      last_login: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
     });
   },
-
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable("users");
   },
 };

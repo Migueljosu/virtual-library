@@ -1,24 +1,15 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Carregar configurações do banco de dados
-const config = require('../config/config.js');
-const env = process.env.NODE_ENV || 'development';
-const dbConfig = config[env];
+// Configuração do banco de dados
+const sequelize = new Sequelize({
+  dialect: 'mysql',
+  host: 'localhost',
+  username: 'root',
+  password: process.env.DB_PASSWORD, // Usar variável de ambiente para a senha
+  database: 'virtual_library',
+});
 
-// Conectar ao banco de dados
-const sequelize = new Sequelize(
-  dbConfig.database,
-  dbConfig.username,
-  dbConfig.password,
-  {
-    host: dbConfig.host,
-    dialect: dbConfig.dialect,
-    logging: dbConfig.logging, // Defina para true se quiser ver os logs de SQL
-  }
-);
-
-// Teste da conexão
 async function testConnection() {
   try {
     await sequelize.authenticate();
