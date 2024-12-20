@@ -1,9 +1,9 @@
 const express = require('express');
-const { createBook, getBooks } = require('../controllers/bookController');
-const { authenticateToken } = require('../middleware/authMiddleware');
+const { createBook } = require('../controllers/bookController');
+
 const router = express.Router();
 
-router.post('/create', authenticateToken, createBook);
-router.get('/list', getBooks);
+// Esta rota precisa ser configurada corretamente
+router.post('/books', createBook);
 
 module.exports = router;

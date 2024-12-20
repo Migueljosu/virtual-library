@@ -2,8 +2,18 @@
 const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
+const googleRoutes = require('./routes/googleRoutes');
+const dotenv = require('dotenv');
+const bookRoutes = require('./routes/bookRoutes');
+const fileUpload = require('express-fileupload');
+require('dotenv').config();
+
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+const { trainModel } = require('./config/brain');
+trainModel();
 
 // Middlewares
 app.use(
@@ -34,9 +44,13 @@ app.use(
 );
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));  // Para lidar com dados de formulários
+app.use(fileUpload());
 
 // Rotas
 app.use("/api/users", authRoutes);
+app.use('/google', googleRoutes);
+app.use('/api', bookRoutes);
 
 module.exports = app;
     

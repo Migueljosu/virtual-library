@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
+import axiosInstance from "../utils/axiosInstance"; // Certifique-se de importar corretamente sua instância axios
 import {
   FaUpload,
   FaFileAlt,
@@ -8,69 +9,99 @@ import {
   FaTag,
   FaDollarSign,
   FaCalendar,
-} from "react-icons/fa"; // Ícones
+} from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify"; // Importando toast e ToastContainer
+import "react-toastify/dist/ReactToastify.css"; // Estilo do toastify
 
 const CreateNewBook = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [author, setAuthor] = useState("");
-  const [genre, setGenre] = useState(""); // Alterado de categoria para gênero
+  const [genre, setGenre] = useState("");
   const [status, setStatus] = useState("draft");
   const [isFree, setIsFree] = useState(true);
   const [price, setPrice] = useState("");
   const [publicationDate, setPublicationDate] = useState("");
   const [file, setFile] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const handleCreate = (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
-    console.log("Creating new book:", {
-      title,
-      description,
-      author,
-      genre,
-      status,
-      isFree,
-      price,
-      publicationDate,
-      file,
-    });
-    // Adicionar lógica para salvar o livro, como enviar para o backend
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("author", author);
+      formData.append("genre", genre);
+      formData.append("status", status);
+      formData.append("isFree", isFree);
+      if (!isFree) formData.append("price", price);
+      formData.append("publicationDate", publicationDate);
+      if (file) formData.append("file", file);
+      if (coverImage) formData.append("coverImage", coverImage);
+
+      const response = await axiosInstance.post("/api/books", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (progressEvent) => {
+          setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
+        },
+      });
+
+      toast.success("Book created successfully!"); // Exibe o toast de sucesso
+      console.log(response.data);
+      // Limpar os campos após a criação
+      setTitle("");
+      setDescription("");
+      setAuthor("");
+      setGenre("");
+      setStatus("draft");
+      setIsFree(true);
+      setPrice("");
+      setPublicationDate("");
+      setFile(null);
+      setCoverImage(null);
+      setProgress(0);
+    } catch (error) {
+      console.error("Error creating book:", error);
+      toast.error("An error occurred while creating the book."); // Exibe o toast de erro
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileChange = (acceptedFiles) => {
-    setFile(acceptedFiles[0]);
+    if (acceptedFiles[0]) {
+      setFile(acceptedFiles[0]);
+    }
   };
 
-  const handleUpload = () => {
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    setLoading(true);
-
-    // Aqui você pode fazer a requisição para o backend com axios ou fetch
-    setTimeout(() => {
-      setLoading(false);
-      setProgress(100);
-      alert("File uploaded!");
-    }, 2000);
+  const handleCoverChange = (acceptedFiles) => {
+    if (acceptedFiles[0]) {
+      setCoverImage(acceptedFiles[0]);
+    }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps: getFileRootProps, getInputProps: getFileInputProps } = useDropzone({
     onDrop: handleFileChange,
-    accept: ".pdf, .epub, .mobi, .jpg, .jpeg, .png", // Aceitar diversos tipos de arquivos
+    accept: ".pdf, .epub, .mobi",
+  });
+
+  const { getRootProps: getCoverRootProps, getInputProps: getCoverInputProps } = useDropzone({
+    onDrop: handleCoverChange,
+    accept: ".jpg, .jpeg, .png",
   });
 
   return (
     <form onSubmit={handleCreate} className="bg-white p-6 shadow-md rounded-lg">
-      {/* Título do Livro */}
+      <h2 className="text-xl font-semibold text-wood-brown mb-4">Create a New Book</h2>
+
+      {/* Title */}
       <div className="mb-4">
-        <h2 className="text-xl font-semibold text-wood-brown mb-4">
-          Create a New Book
-        </h2>
         <label className="block text-sm font-semibold text-wood-brown">
           <FaTag className="inline-block mr-2" />
           Book Title
@@ -79,13 +110,13 @@ const CreateNewBook = () => {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md"
           placeholder="Enter book title"
           required
         />
       </div>
 
-      {/* Descrição */}
+      {/* Description */}
       <div className="mb-4">
         <label className="block text-sm font-semibold text-wood-brown">
           <FaFileAlt className="inline-block mr-2" />
@@ -94,14 +125,14 @@ const CreateNewBook = () => {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md"
           placeholder="Enter book description"
           rows="4"
           required
         />
       </div>
 
-      {/* Autor */}
+      {/* Author */}
       <div className="mb-4">
         <label className="block text-sm font-semibold text-wood-brown">
           <FaUser className="inline-block mr-2" />
@@ -111,13 +142,13 @@ const CreateNewBook = () => {
           type="text"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
-          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md"
           placeholder="Enter author name"
           required
         />
       </div>
 
-      {/* Gênero do Livro */}
+      {/* Genre */}
       <div className="mb-4">
         <label className="block text-sm font-semibold text-wood-brown">
           <FaTag className="inline-block mr-2" />
@@ -126,7 +157,7 @@ const CreateNewBook = () => {
         <select
           value={genre}
           onChange={(e) => setGenre(e.target.value)}
-          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md"
           required
         >
           <option value="">Select Genre</option>
@@ -134,15 +165,12 @@ const CreateNewBook = () => {
           <option value="non-fiction">Non-fiction</option>
           <option value="sci-fi">Sci-Fi</option>
           <option value="biography">Biography</option>
-          {/* Adicionar mais categorias aqui */}
         </select>
       </div>
 
-      {/* Status do Livro */}
+      {/* Status */}
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-wood-brown">
-          Status
-        </label>
+        <label className="block text-sm font-semibold text-wood-brown">Status</label>
         <div className="flex items-center space-x-4">
           <label className="flex items-center">
             <input
@@ -167,7 +195,7 @@ const CreateNewBook = () => {
         </div>
       </div>
 
-      {/* Grátis ou Pago */}
+      {/* Free or Paid */}
       <div className="mb-4">
         <label className="block text-sm font-semibold text-wood-brown">
           <FaDollarSign className="inline-block mr-2" />
@@ -186,7 +214,6 @@ const CreateNewBook = () => {
         </div>
       </div>
 
-      {/* Preço (visível se não for gratuito) */}
       {!isFree && (
         <div className="mb-4">
           <label className="block text-sm font-semibold text-wood-brown">
@@ -197,14 +224,14 @@ const CreateNewBook = () => {
             type="number"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md"
             placeholder="Enter book price"
             required
           />
         </div>
       )}
 
-      {/* Data de Publicação */}
+      {/* Publication Date */}
       <div className="mb-4">
         <label className="block text-sm font-semibold text-wood-brown">
           <FaCalendar className="inline-block mr-2" />
@@ -214,78 +241,61 @@ const CreateNewBook = () => {
           type="date"
           value={publicationDate}
           onChange={(e) => setPublicationDate(e.target.value)}
-          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md"
           required
         />
       </div>
 
-      {/* Upload da Capa do Livro */}
+      {/* Upload Cover */}
       <div className="mb-4">
         <label className="block text-sm font-semibold text-wood-brown">
           <FaUpload className="inline-block mr-2" />
           Upload Cover Image
         </label>
         <div
-          {...getRootProps()}
+          {...getCoverRootProps()}
           className="border-dashed border-2 border-gray-300 p-4 rounded-md"
         >
-          <input {...getInputProps()} />
-          {!file ? (
+          <input {...getCoverInputProps()} />
+          {!coverImage ? (
             <p className="text-center text-gray-600">
               Drag and drop an image or click to select a file
             </p>
           ) : (
-            <div className="flex items-center space-x-4">
-              {file.type.startsWith("image/") ? (
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt="Preview"
-                  className="w-32 h-32 object-cover rounded-md"
-                />
-              ) : (
-                <FaFileAlt className="text-2xl text-gray-600" />
-              )}
-              <div>
-                <span className="block text-gray-700">{file.name}</span>
-                <span className="block text-sm text-gray-500">
-                  {Math.round(file.size / 1024)} KB
-                </span>
-              </div>
-            </div>
+            <img
+              src={URL.createObjectURL(coverImage)}
+              alt="Cover Preview"
+              className="w-32 h-32 object-cover rounded-md"
+            />
           )}
         </div>
       </div>
 
-      {/* Upload do Arquivo do Livro */}
+      {/* Upload File */}
       <div className="mb-4">
         <label className="block text-sm font-semibold text-wood-brown">
           <FaUpload className="inline-block mr-2" />
-          Upload Book File (PDF, EPUB, etc.)
+          Upload Book File
         </label>
         <div
-          {...getRootProps()}
+          {...getFileRootProps()}
           className="border-dashed border-2 border-gray-300 p-4 rounded-md"
         >
-          <input {...getInputProps()} />
+          <input {...getFileInputProps()} />
           {!file ? (
             <p className="text-center text-gray-600">
               Drag and drop your book file here
             </p>
           ) : (
-            <div className="flex items-center space-x-4">
+            <div>
               <FaFileAlt className="text-2xl text-gray-600" />
-              <div>
-                <span className="block text-gray-700">{file.name}</span>
-                <span className="block text-sm text-gray-500">
-                  {Math.round(file.size / 1024)} KB
-                </span>
-              </div>
+              <span className="block text-gray-700">{file.name}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Barra de Progresso */}
+      {/* Progress Bar */}
       {loading && (
         <div className="mt-4">
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -297,14 +307,16 @@ const CreateNewBook = () => {
         </div>
       )}
 
-      {/* Botão para Criar Livro */}
       <button
         type="submit"
-        onClick={handleUpload}
-        className="w-full mt-6 py-2 px-4 bg-brown-500 hover:bg-brown-600 rounded-md text-white font-semibold"
+        className="w-full mt-6 py-2 px-4 bg-wood-brown hover:bg-brown-600 rounded-md text-white font-semibold"
+        disabled={loading}
       >
         {loading ? "Uploading..." : "Create Book"}
       </button>
+
+      {/* ToastContainer para mostrar notificações */}
+      <ToastContainer />
     </form>
   );
 };
