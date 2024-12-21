@@ -11,8 +11,8 @@ const userValidation = [
     .isLength({ min: 6 })
     .withMessage("A senha deve ter pelo menos 6 caracteres"),
   check("role")
-    .optional()  // Tornar o 'role' opcional
-    .isIn(['reader', 'admin', 'moderator'])  // Definindo opções válidas para 'role'
+    .optional() // Tornar o 'role' opcional
+    .isIn(["reader", "admin", "moderator"]) // Definindo opções válidas para 'role'
     .withMessage("O papel deve ser 'reader', 'admin' ou 'moderator'"),
 ];
 
@@ -41,7 +41,7 @@ const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role,  // Role pode ser qualquer um dos valores definidos
+      role, // Role pode ser qualquer um dos valores definidos
     });
 
     // Criando token JWT para autenticação
@@ -69,10 +69,53 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "O email já está em uso." });
     }
 
-    return res.status(500).json({ message: "Erro ao criar conta. Tente novamente mais tarde." });
+    return res
+      .status(500)
+      .json({ message: "Erro ao criar conta. Tente novamente mais tarde." });
   }
 };
 
+// Alteração de senha
+const changePassword = async (req, res) => {
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+
+  // Verifique se as senhas coincidem
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ message: "As senhas não coincidem" });
+  }
+
+  try {
+    // Encontre o usuário pelo ID (decodificado do token)
+    const user = await User.findByPk(req.user.id); // Usando findByPk em vez de findById
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    // Verifique se a senha antiga está correta
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Senha antiga incorreta" });
+    }
+
+    // Gere a nova senha criptografada
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Atualize a senha do usuário
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Senha alterada com sucesso" });
+  } catch (error) {
+    console.error(error); // Adiciona o erro completo ao console para diagnóstico
+
+    // Envia o erro completo com uma mensagem amigável
+    res.status(500).json({
+      message: "Erro ao alterar a senha",
+      error: error.message || error,
+    });
+  }
+};
 // Login de usuário
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -98,7 +141,12 @@ const loginUser = async (req, res) => {
 
     return res.json({
       message: "Login bem-sucedido!",
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
       token,
     });
   } catch (error) {
@@ -107,4 +155,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, userValidation };
+module.exports = { registerUser, loginUser, changePassword, userValidation };

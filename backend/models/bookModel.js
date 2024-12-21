@@ -32,6 +32,11 @@ const Book = sequelize.define('Book', {
     type: DataTypes.BOOLEAN,
     defaultValue: true
   },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    defaultValue: 0.0
+  },
   file_url: {
     type: DataTypes.STRING,
     allowNull: false

@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Dashboard from '../components/Dashboard';
 import UserList from '../components/UserList';
 import Settings from '../components/Settings';
 import BookList from '../components/BookList';
 import CreateNewBook from "../components/CreateNewBook";
+import CategoryManager from "../components/CategoryManager";
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  // Recupera o estado da aba ativa do localStorage ou define a aba padrão (dashboard)
+  const [activeTab, setActiveTab] = useState(() => {
+    const savedTab = localStorage.getItem('activeTab');
+    return savedTab ? savedTab : 'dashboard'; // 'dashboard' é a aba padrão
+  });
+
+  // Sempre que a aba ativa mudar, salva no localStorage
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
 
   return (
     <div className="flex">
@@ -21,6 +31,7 @@ const AdminPage = () => {
         {activeTab === 'books' && <BookList />}
         {activeTab === 'publish_books' && <CreateNewBook />}
         {activeTab === 'Settings' && <Settings />}
+        {activeTab === 'CategoryManager' && <CategoryManager />}
       </div>
     </div>
   );

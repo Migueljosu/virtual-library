@@ -6,11 +6,13 @@ const googleRoutes = require('./routes/googleRoutes');
 const dotenv = require('dotenv');
 const bookRoutes = require('./routes/bookRoutes');
 const fileUpload = require('express-fileupload');
+const categoryRoutes = require('./routes/categoryRoutes');
+
 require('dotenv').config();
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
 
 const { trainModel } = require('./config/brain');
 trainModel();
@@ -51,6 +53,10 @@ app.use(fileUpload());
 app.use("/api/users", authRoutes);
 app.use('/google', googleRoutes);
 app.use('/api', bookRoutes);
+// Rotas de categoria
+app.use('/api', categoryRoutes);  // Prefixando todas as rotas de categoria com '/api'
+
+
 
 module.exports = app;
     

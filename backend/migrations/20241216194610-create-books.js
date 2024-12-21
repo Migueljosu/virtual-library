@@ -39,6 +39,11 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
       },
+      price: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: true,
+        defaultValue: 0.0,
+      },
       file_url: {
         type: Sequelize.STRING(255),
         allowNull: false,

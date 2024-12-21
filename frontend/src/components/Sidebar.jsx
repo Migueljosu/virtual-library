@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaTachometerAlt, FaUsers, FaBook, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import { FaTachometerAlt, FaUsers, FaBook, FaCog, FaSignOutAlt, FaTag } from 'react-icons/fa';
 import Logo from '../assets/images/logo.svg'; // Importe sua logo aqui
 import { useNavigate } from 'react-router-dom'; // Alterado para useNavigate
 
@@ -73,6 +73,13 @@ const Sidebar = ({ setActiveTab }) => {
         >
           <FaCog size={20} />
           <span>Settings</span>
+        </li>
+        <li
+          onClick={() => setActiveTab('CategoryManager')}
+          className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
+        >
+          <FaTag size={20} />
+          <span>Category Manager</span>
         </li>
 
         {/* Logout */}
