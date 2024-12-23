@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import { FaArrowUp, FaHandsHelping } from "react-icons/fa";
 import Home from "./pages/Home";
 import LoginPage from "./pages/Login";
@@ -7,7 +12,9 @@ import CreateAccount from "./pages/CreateAccount";
 import ReaderDashboard from "./pages/ReaderDashboard";
 import WriterDashboard from "./pages/WriterDashboard";
 import AdminPage from "./pages/AdminPage";
-import { checkUserRole } from "./utils/auth"; 
+import { checkUserRole } from "./utils/auth";
+import ResetPassword from "./components/ResetPassword"; // Importe o componente ResetPassword
+import ActivateAccount from "./components/ActivateAccount";
 
 const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -76,7 +83,16 @@ const App = () => {
               )
             }
           />
-          <Route path="/login" element={isAuthenticated ? <Navigate to={`/${role}-dashboard`} /> : <LoginPage />} />
+          <Route
+            path="/login"
+            element={
+              isAuthenticated ? (
+                <Navigate to={`/${role}-dashboard`} />
+              ) : (
+                <LoginPage />
+              )
+            }
+          />
           <Route path="/create-account" element={<CreateAccount />} />
           <Route
             path="/reader-dashboard"
@@ -108,6 +124,10 @@ const App = () => {
               )
             }
           />
+          <Route path="/activate" element={<ActivateAccount />} />
+
+          {/* Nova rota para a página ResetPassword */}
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
         <ScrollToTopButton />

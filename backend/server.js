@@ -1,9 +1,14 @@
 //server.js backend
 const app = require("./app");
+const sequelize = require("./config/db"); // Importe a instância do Sequelize
 require("dotenv").config();
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+sequelize.sync()
+  .then(() => {
+    app.listen(5000, () => {
+      console.log('Servidor rodando na porta 5000');
+    });
+  })
+  .catch((err) => {
+    console.error('Erro ao conectar com o banco de dados:', err);
+  });

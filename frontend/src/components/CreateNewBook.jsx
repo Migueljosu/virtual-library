@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import axiosInstance from "../utils/axiosInstance"; // Certifique-se de importar corretamente sua instância axios
 import {
   FaUpload,
   FaFileAlt,
-  FaRegClock,
   FaUser,
   FaTag,
   FaDollarSign,
@@ -17,7 +16,8 @@ const CreateNewBook = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [author, setAuthor] = useState("");
-  const [genre, setGenre] = useState("");
+  const [category, setCategory] = useState(""); // Categoria do livro
+  const [categories, setCategories] = useState([]); // Lista de categorias carregadas
   const [status, setStatus] = useState("draft");
   const [isFree, setIsFree] = useState(true);
   const [price, setPrice] = useState("");
@@ -27,6 +27,22 @@ const CreateNewBook = () => {
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  // Carregar todas as categorias na inicialização
+  useEffect(() => {
+    setLoading(true); // Indica que o carregamento começou
+    axiosInstance
+      .get("/api/categories")
+      .then((response) => {
+        const data = Array.isArray(response.data.categories)
+          ? response.data.categories
+          : [];
+        setCategories(data); // Atualiza o estado com as categorias carregadas
+      })
+      .catch((error) => {
+        toast.error("Erro ao carregar categorias"); // Exibe notificação de erro
+      })
+      .finally(() => setLoading(false)); // Finaliza o carregamento
+  }, []);
   const handleCreate = async (e) => {
     e.preventDefault();
 
@@ -37,7 +53,7 @@ const CreateNewBook = () => {
       formData.append("title", title);
       formData.append("description", description);
       formData.append("author", author);
-      formData.append("genre", genre);
+      formData.append("category", category); 
       formData.append("status", status);
       formData.append("isFree", isFree);
       if (!isFree) formData.append("price", price);
@@ -48,7 +64,9 @@ const CreateNewBook = () => {
       const response = await axiosInstance.post("/api/books", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (progressEvent) => {
-          setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
+          setProgress(
+            Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          );
         },
       });
 
@@ -58,7 +76,7 @@ const CreateNewBook = () => {
       setTitle("");
       setDescription("");
       setAuthor("");
-      setGenre("");
+      setCategory("");
       setStatus("draft");
       setIsFree(true);
       setPrice("");
@@ -86,19 +104,23 @@ const CreateNewBook = () => {
     }
   };
 
-  const { getRootProps: getFileRootProps, getInputProps: getFileInputProps } = useDropzone({
-    onDrop: handleFileChange,
-    accept: ".pdf, .epub, .mobi",
-  });
+  const { getRootProps: getFileRootProps, getInputProps: getFileInputProps } =
+    useDropzone({
+      onDrop: handleFileChange,
+      accept: ".pdf, .epub, .mobi",
+    });
 
-  const { getRootProps: getCoverRootProps, getInputProps: getCoverInputProps } = useDropzone({
-    onDrop: handleCoverChange,
-    accept: ".jpg, .jpeg, .png",
-  });
+  const { getRootProps: getCoverRootProps, getInputProps: getCoverInputProps } =
+    useDropzone({
+      onDrop: handleCoverChange,
+      accept: ".jpg, .jpeg, .png",
+    });
 
   return (
     <form onSubmit={handleCreate} className="bg-white p-6 shadow-md rounded-lg">
-      <h2 className="text-xl font-semibold text-wood-brown mb-4">Create a New Book</h2>
+      <h2 className="text-xl font-semibold text-wood-brown mb-4">
+        Create a New Book
+      </h2>
 
       {/* Title */}
       <div className="mb-4">
@@ -152,25 +174,28 @@ const CreateNewBook = () => {
       <div className="mb-4">
         <label className="block text-sm font-semibold text-wood-brown">
           <FaTag className="inline-block mr-2" />
-          Genre
+          Category
         </label>
         <select
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md"
           required
         >
-          <option value="">Select Genre</option>
-          <option value="fiction">Fiction</option>
-          <option value="non-fiction">Non-fiction</option>
-          <option value="sci-fi">Sci-Fi</option>
-          <option value="biography">Biography</option>
+          <option value="">Select a category</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
         </select>
       </div>
 
       {/* Status */}
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-wood-brown">Status</label>
+        <label className="block text-sm font-semibold text-wood-brown">
+          Status
+        </label>
         <div className="flex items-center space-x-4">
           <label className="flex items-center">
             <input

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Dashboard from '../components/Dashboard';
 import UserList from '../components/UserList';
-import Settings from '../components/Settings';
+import Settings from '../components/RequestPasswordReset';
 import BookList from '../components/BookList';
 import CreateNewBook from "../components/CreateNewBook";
 import CategoryManager from "../components/CategoryManager";

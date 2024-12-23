@@ -15,6 +15,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^8.17.0",
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
     "brain.js": "^2.0.0-beta.24",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -25,7 +26,10 @@
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.11.5",
+    "nodemailer": "^6.9.16",
+    "readline-sync": "^1.4.10",
     "sequelize": "^6.37.5",
+    "socket.io": "^4.8.1",
     "typesense": "^1.8.2"
   },
   "devDependencies": {

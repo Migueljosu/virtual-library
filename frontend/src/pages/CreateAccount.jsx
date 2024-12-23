@@ -41,6 +41,8 @@ const CreateAccount = () => {
           },
         }
       );
+       // Salvar email no localStorage
+    localStorage.setItem("userEmail", email);
 
       // Mensagem de sucesso
       toast.success("Account created successfully!");
@@ -52,9 +54,9 @@ const CreateAccount = () => {
       setConfirmPassword("");
       setAccountType("Reader");
 
-      // Redirecionar para a página de login
+      // Redirecionar para a página de ativação
       setTimeout(() => {
-        navigate("/login"); // Atraso de 1 segundo antes de redirecionar
+        navigate("/activate"); // Redireciona para ativar a conta
       }, 1000); // O redirecionamento acontece após 1 segundo
     } catch (err) {
       // Exibe mensagem de erro

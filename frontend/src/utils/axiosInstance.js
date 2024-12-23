@@ -1,5 +1,6 @@
 // utils/axiosInstance.js
 import axios from 'axios';
+import { useHistory } from 'react-router-dom'; // Se estiver usando React Router para navegação
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
@@ -22,11 +23,13 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-  (response) => response, 
+  (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       console.error('Não autorizado - Token expirado ou inválido');
-      // Adicionar redirecionamento ou logout aqui
+      // Redirecionar para a tela de login ou fazer logout
+      localStorage.removeItem('token'); // Limpar o token
+      window.location.href = '/login'; // Redirecionar para a página de login
     }
     return Promise.reject(error);
   }

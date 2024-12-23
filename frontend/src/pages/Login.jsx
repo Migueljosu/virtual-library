@@ -19,8 +19,18 @@ const Login = () => {
       const response = await axiosInstance.post(
         "/api/users/login",
         { email, password },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: { "Content-Type": "application/json" },
+        }
       );
+
+      // Se a conta não estiver ativada, mostrar mensagem e redirecionar para a página de ativação
+      if (response.data.activationRequired) {
+        toast.error("Sua conta ainda não foi ativada. Verifique seu e-mail.");
+        // Redirecionando para a página de ativação
+        navigate("/activate"); // Garante que a página /activate exista
+        return;
+      }
 
       // Armazenando o token no localStorage
       localStorage.setItem("token", response.data.token);
@@ -29,16 +39,12 @@ const Login = () => {
       // Exibindo mensagem de sucesso
       toast.success("Login bem-sucedido!");
 
-      const { role } = response.data.user; // Obtendo o papel do usuário
+      const { role } = response.data.user;
 
       // Timeout para garantir que o navegador entenda o estado do token
       setTimeout(() => {
-        // Forçando uma recarga da página para que o redirecionamento aconteça com o estado correto
         window.location.reload();
       }, 1000); // 1 segundo de delay antes de recarregar
-
-      // Você pode remover a parte do redirecionamento imediato, pois a página será recarregada
-      // Isso vai permitir que o uso do localStorage seja atualizado após o login
     } catch (err) {
       console.error("Erro no login:", err);
       toast.error(err.response?.data?.message || "Erro ao fazer login!");
@@ -46,6 +52,7 @@ const Login = () => {
       setLoading(false);
     }
   };
+
   return (
     <div
       className="min-h-screen bg-cover bg-center flex items-center justify-center"
