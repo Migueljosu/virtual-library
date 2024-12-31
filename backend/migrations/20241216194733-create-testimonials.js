@@ -1,37 +1,36 @@
-'use strict';
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const User = require('./userModel');
 
-/** @type {import('sequelize-cli').Migration} */
-module.exports = {
-  async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('testimonials', {
-      id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false
-      },
-      user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id'
-        },
-        onDelete: 'CASCADE'
-      },
-      message: {
-        type: Sequelize.TEXT,
-        allowNull: false
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
-      }
-    });
+const Testimonial = sequelize.define('Testimonial', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+    allowNull: false,
   },
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+  },
+  message: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: Sequelize.NOW,
+  },
+}, {
+  timestamps: false, // Habilita o gerenciamento automático de createdAt e updatedAt
+});
 
-  async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('testimonials');
+// Relacionamento
+Testimonial.belongsTo(User, { foreignKey: 'user_id' });
 
-  }
-};
+module.exports = Testimonial;

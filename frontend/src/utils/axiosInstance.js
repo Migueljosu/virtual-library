@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { useHistory } from 'react-router-dom'; // Se estiver usando React Router para navegação
 
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const apiBaseUrl =  'http://localhost:5000';
 
 const axiosInstance = axios.create({
   baseURL: apiBaseUrl,

@@ -107,7 +107,7 @@ const CreateNewBook = () => {
   const { getRootProps: getFileRootProps, getInputProps: getFileInputProps } =
     useDropzone({
       onDrop: handleFileChange,
-      accept: ".pdf, .epub, .mobi",
+      accept: ".pdf, .epub",
     });
 
   const { getRootProps: getCoverRootProps, getInputProps: getCoverInputProps } =

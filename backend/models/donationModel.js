@@ -1,3 +1,4 @@
+// models/donationModel.js
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const User = require('./userModel');
@@ -8,7 +9,7 @@ const Donation = sequelize.define('Donation', {
     allowNull: false
   },
   donation_date: {
-    type: DataTypes.TIMESTAMP,
+    type: DataTypes.TIME,
     defaultValue: Sequelize.NOW
   }
 }, {

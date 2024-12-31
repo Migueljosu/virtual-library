@@ -1,23 +1,72 @@
-import React, { useState } from "react";
-import { FaSearch, FaStar, FaBook, FaUser, FaCalendarAlt } from "react-icons/fa"; // Importando ícones
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Para navegação
+import { FaSearch } from "react-icons/fa";
+import debounce from "lodash.debounce";
+import axiosInstance from "../utils/axiosInstance"; // Supondo que você tenha configurado axiosInstance
 
 const SearchBar = () => {
-  const [query, setQuery] = useState("");
-  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [query, setQuery] = useState(""); // Estado para o texto da pesquisa
+  const [books, setBooks] = useState([]); // Estado para armazenar os livros encontrados
+  const [loading, setLoading] = useState(false); // Estado para controle de carregamento
+  const [page, setPage] = useState(1); // Estado para página de resultados
+  const [totalPages, setTotalPages] = useState(0); // Estado para o total de páginas de resultados
+  const navigate = useNavigate(); // Para navegação ao detalhar um livro
+
+  // Função para buscar livros com base no texto da pesquisa
+  const fetchBooks = async (currentPage = 1) => {
+    if (!query.trim()) {
+      setBooks([]);
+      setTotalPages(0);
+      return;
+    }
+
+    try {
+      setLoading(true); // Define o carregamento como true
+      const response = await axiosInstance.get(`/api/books/search`, {
+        params: { query, page: currentPage, limit: 10 },
+      });
+
+      // Atualiza o estado com os dados de livros e total de páginas
+      setBooks(response.data.books);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error("Erro ao buscar livros:", error);
+    } finally {
+      setLoading(false); // Define o carregamento como false após a requisição
+    }
+  };
+
+  // Função de debounce para evitar chamadas excessivas durante a digitação
+  const debouncedFetchBooks = debounce(() => fetchBooks(page), 500);
+
+  // Manipulador de alteração no campo de busca
+  const handleSearchChange = (e) => {
+    setQuery(e.target.value); // Atualiza o estado com o texto da pesquisa
+    setPage(1); // Reinicia para a primeira página
+    debouncedFetchBooks(); // Faz a pesquisa com debounce
+  };
+
+  // Função para mudar de página
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setPage(newPage);
+    fetchBooks(newPage);
+  };
 
   return (
     <section className="bg-wood-brown py-16 px-4">
-      <h2 className="text-4xl text-white font-bold text-center mb-8">Search for Books</h2>
+      <h2 className="text-4xl text-white font-bold text-center mb-8">
+        Search for Books
+      </h2>
 
-      {/* Barra de pesquisa */}
       <div className="flex justify-center">
         <div className="relative w-full max-w-4xl">
           <input
             type="text"
             className="w-full p-4 pr-12 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-wood-brown transition-all duration-300"
-            placeholder="Search books, authors, genres..."
+            placeholder="Search books, authors, categories..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleSearchChange}
           />
           <FaSearch
             className="absolute right-4 top-1/2 transform -translate-y-1/2 text-wood-brown"
@@ -26,98 +75,63 @@ const SearchBar = () => {
         </div>
       </div>
 
-      {/* Botão para exibir filtros */}
-      <div className="mt-4 flex justify-center mb-4">
-        <button
-          onClick={() => setFiltersVisible(!filtersVisible)}
-          className="px-6 py-2 bg-white text-wood-brown border border-wood-brown rounded-md hover:bg-wood-brown hover:text-white transition-all duration-300"
-        >
-          Filter Options
-        </button>
+      <div className="mt-8">
+        {loading ? (
+          <div className="text-center text-white">Carregando livros...</div>
+        ) : (
+          <>
+            {books.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {books.map((book) => (
+                  <div
+                    key={book.id}
+                    className="p-6 bg-wood-brown text-white flex flex-col justify-between flex-grow"
+                  >
+                    <h3 className="text-xl font-semibold">{book.title}</h3>
+                    <p className="text-gray-200 mt-2">
+                      {book.description || "Descrição não disponível."}
+                    </p>
+                    <p className="mt-4 text-yellow-400">
+                      {book.category || "Categoria desconhecida"}
+                    </p>
+                    <button
+                      className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded"
+                      onClick={() => navigate(`/book/${book.id}`)} // Navegação para o detalhamento do livro
+                    >
+                      Ver Detalhes
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-white">
+                Nenhum livro encontrado.
+              </div>
+            )}
+
+            {/* Paginação */}
+            <div className="flex justify-center mt-8">
+              <button
+                className="mx-2 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded"
+                disabled={page === 1}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                Anterior
+              </button>
+              <span className="text-white mx-4">
+                Página {page} de {totalPages}
+              </span>
+              <button
+                className="mx-2 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded"
+                disabled={page === totalPages}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                Próxima
+              </button>
+            </div>
+          </>
+        )}
       </div>
-
-      {/* Filtros de pesquisa */}
-      {filtersVisible && (
-        <div className="mt-4 flex justify-center gap-6 flex-wrap">
-          <div className="flex items-center gap-2">
-            <FaBook className="text-white" size={20} />
-            <h3 className="text-white text-lg font-semibold mb-2">Genre</h3>
-            {/* Subfiltro de Gêneros */}
-            <div className="flex flex-col gap-2">
-              {["Fiction", "Non-fiction", "Fantasy", "Science", "Mystery"].map((genre) => (
-                <label key={genre} className="flex items-center text-white">
-                  <input type="radio" name="genre" className="mr-2" /> {genre}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <FaUser className="text-white" size={20} />
-            <h3 className="text-white text-lg font-semibold mb-2">Author</h3>
-            {/* Subfiltro de Autores */}
-            <div className="flex flex-col gap-2">
-              {["J.K. Rowling", "George Orwell", "Isaac Asimov", "Agatha Christie"].map((author) => (
-                <label key={author} className="flex items-center text-white">
-                  <input type="radio" name="author" className="mr-2" /> {author}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <FaStar className="text-white" size={20} />
-            <h3 className="text-white text-lg font-semibold mb-2">Rating</h3>
-            {/* Subfiltro de Rating */}
-            <div className="flex flex-col gap-2">
-              {[0, 1, 2, 3, 4, 5].map((rating) => (
-                <label key={rating} className="flex items-center text-white">
-                  <input type="radio" name="rating" className="mr-2" /> {rating} Stars
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <FaStar className="text-white" size={20} />
-            <h3 className="text-white text-lg font-semibold mb-2">Recommendations</h3>
-            {/* Subfiltro de Recomendações */}
-            <div className="flex flex-col gap-2">
-              {["Bestsellers", "Highly Rated", "Top Picks", "New Arrivals"].map((recommendation) => (
-                <label key={recommendation} className="flex items-center text-white">
-                  <input type="radio" name="recommendation" className="mr-2" /> {recommendation}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <FaCalendarAlt className="text-white" size={20} />
-            <h3 className="text-white text-lg font-semibold mb-2">Year</h3>
-            {/* Subfiltro de Ano */}
-            <div className="flex flex-col gap-2">
-              {[2024, 2023, 2022, 2021, 2020].map((year) => (
-                <label key={year} className="flex items-center text-white">
-                  <input type="radio" name="year" className="mr-2" /> {year}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <FaCalendarAlt className="text-white" size={20} />
-            <h3 className="text-white text-lg font-semibold mb-2">Availability</h3>
-            {/* Subfiltro de Disponibilidade */}
-            <div className="flex flex-col gap-2">
-              {["In Stock", "Out of Stock", "Pre-order"].map((availability) => (
-                <label key={availability} className="flex items-center text-white">
-                  <input type="radio" name="availability" className="mr-2" /> {availability}
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 };

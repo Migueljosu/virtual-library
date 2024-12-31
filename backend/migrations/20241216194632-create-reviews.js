@@ -30,7 +30,7 @@ module.exports = {
       },
       rating: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         check: {
           args: [1, 5],
           msg: 'Rating must be between 1 and 5',

@@ -1,11 +1,17 @@
-// models/bookModel.js
-
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const User = require('./userModel');
 const Category = require('./categoryModel');
+const User = require('./userModel');
+const Review = require('./reviewModel');
+const Recommendation = require('./recommendationModel');
+const Reaction = require('./reactionModel');
 
 const Book = sequelize.define('Book', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   title: {
     type: DataTypes.STRING(255),
     allowNull: false
@@ -65,33 +71,26 @@ const Book = sequelize.define('Book', {
     defaultValue: false
   },
   status: {
-    type: DataTypes.ENUM('draft', 'published'),  // Tipo ENUM com os valores possíveis
-    defaultValue: 'draft',  // Valor padrão
-    allowNull: false,  // O campo não pode ser nulo
+    type: DataTypes.ENUM('draft', 'published'),
+    defaultValue: 'draft',
+    allowNull: false,
   },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
   }
 }, {
-  timestamps: false, // Desabilita o gerenciamento automático de timestamps
-  createdAt: 'created_at', // Define o campo para a data de criação
-  updatedAt: false // Desabilita o campo de data de atualização
+  timestamps: false,
+  createdAt: 'created_at',
+  updatedAt: false
 });
 
-// Relacionamentos
 Book.associate = function (models) {
-  // Relacionamento com a tabela 'Category'
-  Book.belongsTo(models.Category, {
-    foreignKey: 'category_id',
-    as: 'category'
-  });
-
-  // Relacionamento com a tabela 'User' (escritor)
-  Book.belongsTo(models.User, {
-    foreignKey: 'writer_id',
-    as: 'writer'
-  });
+  Book.belongsTo(models.Category, { foreignKey: 'category_id', as: 'category' });
+  Book.belongsTo(models.User, { foreignKey: 'writer_id', as: 'writer' });
+  Book.hasMany(models.Recommendation, { foreignKey: 'book_id', as: 'recommendations' });
+  Book.hasMany(models.Review, { foreignKey: 'book_id', as: 'reviews' });
+  Book.hasMany(models.Reaction, { foreignKey: 'book_id', as: 'reactions' });
 };
 
 module.exports = Book;

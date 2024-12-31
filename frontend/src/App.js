@@ -15,6 +15,9 @@ import AdminPage from "./pages/AdminPage";
 import { checkUserRole } from "./utils/auth";
 import ResetPassword from "./components/ResetPassword"; // Importe o componente ResetPassword
 import ActivateAccount from "./components/ActivateAccount";
+import BookDetails from "./components/BookDetails";
+import ReaderPage from './pages/ReaderPage';
+
 
 const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -125,10 +128,13 @@ const App = () => {
             }
           />
           <Route path="/activate" element={<ActivateAccount />} />
+          <Route path="/book/:bookId" element={<BookDetails />} />
 
           {/* Nova rota para a página ResetPassword */}
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="/reader" element={<ReaderPage />} />
+
         </Routes>
         <ScrollToTopButton />
         <DonationButton />

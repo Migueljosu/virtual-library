@@ -1,7 +1,7 @@
 // models/activationCodeModel.js
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const User = require("./userModel");  // Importe o modelo User
+const User = require("./userModel");
 
 const ActivationCode = sequelize.define('ActivationCode', {
   id: {
@@ -16,7 +16,7 @@ const ActivationCode = sequelize.define('ActivationCode', {
       model: 'Users',
       key: 'id',
     },
-    onDelete: 'CASCADE', // Remove códigos de ativação quando o usuário for deletado
+    onDelete: 'CASCADE',
   },
   code: {
     type: DataTypes.STRING(6),
@@ -29,10 +29,9 @@ const ActivationCode = sequelize.define('ActivationCode', {
 });
 
 ActivationCode.associate = function(models) {
-  // Relacionamento com o modelo User
   ActivationCode.belongsTo(models.User, {
-    foreignKey: 'user_id', // Chave estrangeira para o User
-    as: 'user',  // Nome do relacionamento
+    foreignKey: 'user_id',
+    as: 'user',
   });
 };
 
