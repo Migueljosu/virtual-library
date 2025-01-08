@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../utils/axiosInstance";
 import {
   FaEdit,
   FaTrashAlt,
@@ -6,54 +7,65 @@ import {
   FaList,
   FaStar,
   FaRegStar,
+  FaStarHalfAlt,
   FaSearch,
 } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const BookList = () => {
-  const books = [
-    {
-      title: "The Catcher in the Rye",
-      author: "J.D. Salinger",
-      genre: "Fiction",
-      cover: "https://via.placeholder.com/100x150",
-      pages: 277,
-      rating: 4,
-      recommended: true,
-    },
-    {
-      title: "1984",
-      author: "George Orwell",
-      genre: "Dystopian",
-      cover: "https://via.placeholder.com/100x150",
-      pages: 328,
-      rating: 5,
-      recommended: true,
-    },
-    {
-      title: "Moby Dick",
-      author: "Herman Melville",
-      genre: "Adventure",
-      cover: "https://via.placeholder.com/100x150",
-      pages: 635,
-      rating: 3,
-      recommended: false,
-    },
-  ];
-
+  const [books, setBooks] = useState([]);
   const [viewMode, setViewMode] = useState("table");
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    // Requisição para pegar os livros da API
+    axiosInstance
+      .get("/api/books/all")
+      .then((response) => {
+        console.log("Books data:", response.data.books); // Verifique se os livros estão sendo carregados corretamente
+        setBooks(response.data.books);
+      })
+      .catch((error) => {
+        console.error("Erro ao carregar os livros:", error);
+        toast.error("Erro ao carregar os livros!");
+      });
+  }, []);
+
+  const handleDelete = (bookId) => {
+    console.log("Deleting book with ID:", bookId); // Verifique o valor do ID
+    if (!bookId) {
+      toast.error("ID do livro inválido!");
+      return;
+    }
+
+    axiosInstance
+      .delete(`/api/books/delete/${bookId}`)
+      .then(() => {
+        setBooks(books.filter((book) => book.id !== bookId));
+        toast.success("Livro excluído com sucesso!");
+      })
+      .catch((error) => {
+        console.error("Erro ao excluir livro:", error);
+        toast.error("Erro ao excluir livro!");
+      });
+  };
+
+  const handleEdit = (bookId) => {
+    // Navegar para a página de edição (supondo que você tenha uma página de edição)
+    window.location.href = `/edit-book/${bookId}`;
+  };
 
   const filteredBooks = books.filter(
     (book) =>
       book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.genre.toLowerCase().includes(searchTerm.toLowerCase())
+      book.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="p-6 bg-white shadow-md rounded-lg">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-        
         <h2 className="text-3xl font-bold text-[#3E2A47] mb-4 md:mb-0">
           Books
         </h2>
@@ -124,14 +136,14 @@ const BookList = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredBooks.map((book, idx) => (
+            {filteredBooks.map((book) => (
               <tr
-                key={idx}
+                key={book.id} // Alterado para usar `id` em vez de `_id`
                 className="hover:bg-[#F5E0C1] transition-all duration-200 ease-in-out"
               >
                 <td className="px-6 py-4 border-b">
                   <img
-                    src={book.cover}
+                    src={book.coverUrl}
                     alt={book.title}
                     className="w-16 h-24 object-cover rounded"
                   />
@@ -143,32 +155,43 @@ const BookList = () => {
                   {book.author}
                 </td>
                 <td className="px-6 py-4 border-b text-[#3E2A47]">
-                  {book.genre}
+                  {book.category}
                 </td>
                 <td className="px-6 py-4 border-b text-[#3E2A47]">
-                  {book.pages}
+                  {book.pageCount}
                 </td>
                 <td className="px-6 py-4 border-b text-[#3E2A47]">
-                  {[...Array(5)].map((_, i) =>
-                    i < book.rating ? (
-                      <FaStar key={i} color="#FFD700" />
-                    ) : (
-                      <FaRegStar key={i} color="#FFD700" />
-                    )
-                  )}
+                  {[...Array(5)].map((_, i) => {
+                    if (i < Math.floor(book.rating)) {
+                      return <FaStar key={i} color="#FFD700" />;
+                    } else if (
+                      i === Math.floor(book.rating) &&
+                      book.rating % 1 !== 0
+                    ) {
+                      return <FaStarHalfAlt key={i} color="#FFD700" />;
+                    } else {
+                      return <FaRegStar key={i} color="#FFD700" />;
+                    }
+                  })}
                 </td>
                 <td className="px-6 py-4 border-b text-[#3E2A47]">
-                  {book.recommended ? (
+                  {book.isPublished ? (
                     <span className="text-green-600 font-semibold">Yes</span>
                   ) : (
                     <span className="text-red-600 font-semibold">No</span>
                   )}
                 </td>
                 <td className="px-6 py-4 border-b">
-                  <button className="text-[#2e8ed7] hover:text-[#6A4F3C] transition-colors duration-200">
+                  <button
+                    className="text-[#2e8ed7] hover:text-[#6A4F3C] transition-colors duration-200"
+                    onClick={() => handleEdit(book.id)} // Alterado para usar `id` em vez de `_id`
+                  >
                     <FaEdit size={20} />
                   </button>
-                  <button className="text-[#fd2e2e] hover:text-[#A67C52] ml-4 transition-colors duration-200">
+                  <button
+                    className="text-[#fd2e2e] hover:text-[#A67C52] ml-4 transition-colors duration-200"
+                    onClick={() => handleDelete(book.id)} // Alterado para usar `id` em vez de `_id`
+                  >
                     <FaTrashAlt size={20} />
                   </button>
                 </td>
@@ -178,52 +201,51 @@ const BookList = () => {
         </table>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filteredBooks.map((book, idx) => (
+          {filteredBooks.map((book) => (
             <div
-              key={idx}
+              key={book.id} // Alterado para usar `id` em vez de `_id`
               className="bg-[#F5E0C1] p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
             >
               <img
-                src={book.cover}
+                src={book.coverUrl}
                 alt={book.title}
                 className="w-full h-48 object-cover rounded mb-4"
               />
               <h3 className="text-xl font-bold text-[#3E2A47]">{book.title}</h3>
-              <p className="text-[#6E4B3D] font-medium">by {book.author}</p>
-              <span className="block text-sm text-[#3E2A47] mb-2">
-                {book.genre}
-              </span>
-              <p className="text-sm text-[#3E2A47]">Pages: {book.pages}</p>
+              <p className="text-[#3E2A47]">{book.author}</p>
+              <p className="text-[#3E2A47]">{book.category}</p>
               <div className="flex items-center mt-2">
-                {[...Array(5)].map((_, i) =>
-                  i < book.rating ? (
-                    <FaStar key={i} color="#FFD700" />
-                  ) : (
-                    <FaRegStar key={i} color="#FFD700" />
-                  )
-                )}
+                {[...Array(5)].map((_, i) => {
+                  if (i < Math.floor(book.rating)) {
+                    return <FaStar key={i} color="#FFD700" />;
+                  } else if (
+                    i === Math.floor(book.rating) &&
+                    book.rating % 1 !== 0
+                  ) {
+                    return <FaStarHalfAlt key={i} color="#FFD700" />;
+                  } else {
+                    return <FaRegStar key={i} color="#FFD700" />;
+                  }
+                })}
               </div>
-              <span
-                className={`inline-block mt-2 px-3 py-1 rounded-full ${
-                  book.recommended
-                    ? "bg-green-600 text-white"
-                    : "bg-red-600 text-white"
-                }`}
+              <button
+                className="mt-4 text-[#A67C52] hover:text-[#C49A6C]"
+                onClick={() => handleEdit(book.id)} // Alterado para usar `id` em vez de `_id`
               >
-                {book.recommended ? "Recommended" : "Not Recommended"}
-              </span>
-              <div className="mt-4 flex space-x-4">
-                <button className="text-[#3183d5] hover:text-[#6A4F3C] transition-colors duration-200">
-                  <FaEdit size={20} />
-                </button>
-                <button className="text-[#ec2b2b] hover:text-[#A67C52] transition-colors duration-200">
-                  <FaTrashAlt size={20} />
-                </button>
-              </div>
+                <FaEdit size={20} />
+              </button>
+              <button
+                className="mt-4 ml-4 text-[#fd2e2e] hover:text-[#6A4F3C]"
+                onClick={() => handleDelete(book.id)} // Alterado para usar `id` em vez de `_id`
+              >
+                <FaTrashAlt size={20} />
+              </button>
             </div>
           ))}
         </div>
       )}
+
+      <ToastContainer />
     </div>
   );
 };

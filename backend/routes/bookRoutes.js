@@ -8,6 +8,10 @@ const {
   sendComment,
   sendRecommendation,
   getBookForReading,
+  getAllBooks,
+  editBook,
+  deleteBook,
+  getBookById,
 } = require("../controllers/bookController");
 const router = express.Router();
 
@@ -19,6 +23,7 @@ router.post("/books", protect, createBook); // Aplica o middleware 'protect'
 
 // Rota para buscar livros com filtros
 router.get("/books/search", searchBooks);
+router.get("/books/all", getAllBooks);
 router.get("/books/:bookId", protect, getBookDetails);
 // Enviar Like
 router.post("/:bookId/like", protect, sendLike);
@@ -32,5 +37,9 @@ router.post("/:bookId/reviews", protect, sendComment);
 // Enviar Recomendação
 router.post("/:bookId/recommendations", protect, sendRecommendation);
 router.get("/:bookId/read", getBookForReading);
+
+router.put("/books/edit/:id", editBook);
+router.delete("/books/delete/:id", deleteBook);
+router.get('/books/:id', getBookById);
 
 module.exports = router;

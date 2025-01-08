@@ -9,7 +9,7 @@ const {
   User,
   Category,
 } = require("../models");
-
+const pdfParse = require("pdf-parse"); // Biblioteca para processar PDFs
 // Agora você pode usar os modelos e as associações no seu controlador
 
 const createBook = async (req, res) => {
@@ -410,6 +410,282 @@ const getBookForReading = async (req, res) => {
   }
 };
 
+const getAllBooks = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const { count, rows: books } = await Book.findAndCountAll({
+      include: [
+        {
+          model: Review,
+          as: "reviews",
+          include: [{ model: User, as: "user", attributes: ["name"] }],
+        },
+        {
+          model: Reaction,
+          as: "reactions",
+          include: [
+            { model: User, as: "user_reactions", attributes: ["name"] },
+          ],
+        },
+        {
+          model: Recommendation,
+          as: "recommendations",
+          include: [{ model: User, as: "user", attributes: ["name"] }],
+        },
+        {
+          model: Category,
+          as: "category",
+          attributes: ["name"],
+        },
+      ],
+      limit: parseInt(limit),
+      offset,
+      order: [["created_at", "DESC"]],
+    });
+
+    if (count === 0) {
+      return res.status(404).json({ message: "No books found" });
+    }
+
+    const bookDetails = await Promise.all(
+      books.map(async (book) => {
+        const filePath = path.join(
+          __dirname,
+          "..",
+          "uploads",
+          book.file_url.replace(/^\/uploads/, "")
+        );
+
+        let pageCount = 0;
+
+        if (fs.existsSync(filePath)) {
+          try {
+            const pdfData = await pdfParse(fs.readFileSync(filePath));
+            pageCount = pdfData.numpages || 0;
+          } catch (error) {
+            console.error(
+              `Error parsing PDF for book "${book.title}":`,
+              error.message
+            );
+          }
+        }
+
+        const totalLikes = book.reactions.reduce((likes, reaction) => {
+          return likes + (reaction.reaction_type === "like" ? 1 : 0);
+        }, 0);
+
+        const averageRating =
+          book.reviews.length > 0
+            ? book.reviews.reduce((sum, review) => sum + review.rating, 0) /
+              book.reviews.length
+            : 0;
+
+        return {
+          id: book.id,
+          title: book.title,
+          description: book.description,
+          author: book.author,
+          publicationDate: book.publication_date,
+          price: book.price,
+          isFree: book.is_free,
+          isPublished: book.status === "published",
+          fileUrl: book.file_url,
+          coverUrl: book.cover_url,
+          category: book.category?.name || "Uncategorized",
+          pageCount,
+          reviews: book.reviews.map((review) => ({
+            id: review.id,
+            rating: review.rating,
+            comment: review.comment,
+            createdAt: review.created_at,
+            user: review.user?.name || "Anonymous",
+          })),
+          reactions: book.reactions.map((reaction) => ({
+            id: reaction.id,
+            reactionType: reaction.reaction_type,
+            createdAt: reaction.created_at,
+            user: reaction.user_reactions?.name || "Anonymous",
+          })),
+          recommendations: book.recommendations.map((recommendation) => ({
+            id: recommendation.id,
+            text: recommendation.text,
+            user: recommendation.user?.name || "Anonymous",
+          })),
+          hasRecommendations: book.recommendations.length > 0,
+          likes: totalLikes,
+          ratings: averageRating.toFixed(2),
+        };
+      })
+    );
+
+    res.status(200).json({
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(count / limit),
+      totalBooks: count,
+      books: bookDetails,
+    });
+  } catch (error) {
+    console.error("Error fetching books:", error.message);
+    res.status(500).json({ message: "Failed to fetch books." });
+  }
+};
+
+const editBook = async (req, res) => {
+  try {
+    // Verifique se os arquivos foram enviados
+    const {
+      title,
+      description,
+      author,
+      category,
+      status,
+      isFree,
+      price,
+      publicationDate,
+    } = req.body;
+
+    // Verifique se o ID do livro foi passado
+    const bookId = req.params.id;
+    if (!bookId) {
+      return res.status(400).json({ message: "ID do livro não fornecido!" });
+    }
+
+    // Buscar o livro no banco de dados usando Sequelize
+    const book = await Book.findByPk(bookId);
+    if (!book) {
+      return res.status(404).json({ message: "Livro não encontrado!" });
+    }
+
+    // Atualizar dados de texto
+    book.title = title;
+    book.description = description;
+    book.author = author;
+    book.category = category;
+    book.status = status;
+    book.is_free = isFree;
+    book.price = isFree ? null : price; // Se o livro for gratuito, price será null
+    book.publication_date = publicationDate;
+
+    // Se um novo arquivo foi enviado, atualizar o caminho do arquivo
+    if (req.files && req.files.file) {
+      // Defina o novo caminho do arquivo
+      const filePath = `/uploads/book-file/${req.files.file.name}`;
+      book.file_url = filePath;
+
+      // Salvar o novo arquivo
+      await req.files.file.mv(
+        path.join(__dirname, "..", "uploads", "book-file", req.files.file.name)
+      );
+    }
+
+    // Se uma nova imagem de capa foi enviada, atualizar o caminho da capa
+    if (req.files && req.files.coverImage) {
+      // Defina o novo caminho da capa
+      const coverImagePath = `/uploads/book-cover/${req.files.coverImage.name}`;
+      book.cover_url = coverImagePath;
+
+      // Salvar a nova capa
+      await req.files.coverImage.mv(
+        path.join(
+          __dirname,
+          "..",
+          "uploads",
+          "book-cover",
+          req.files.coverImage.name
+        )
+      );
+    }
+
+    // Salvar as alterações no banco de dados
+    await book.save();
+
+    res.status(200).json({ message: "Livro atualizado com sucesso!", book });
+  } catch (error) {
+    console.error("Erro ao atualizar livro:", error);
+    res.status(500).json({ message: "Erro ao atualizar livro!" });
+  }
+};
+
+const deleteBook = async (req, res) => {
+  const { id } = req.params; // Use "id" para acessar o parâmetro
+  if (!id) {
+    return res.status(400).json({ message: "Book ID is required" });
+  }
+
+  try {
+    // Garantir que id seja convertido para número
+    const deletedBook = await Book.destroy({
+      where: { id: parseInt(id, 10) }, // Convertendo o id para número
+    });
+
+    if (deletedBook) {
+      res.status(200).json({ message: "Book deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Book not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting book" });
+  }
+};
+
+// Função para buscar o livro pelo ID
+const getBookById = async (req, res) => {
+  const bookId = req.params.id;
+
+  try {
+    // Busca o livro com as informações relacionadas que você pediu
+    const book = await Book.findOne({
+      where: { id: bookId },
+      include: [
+        {
+          model: Category,
+          as: "category",
+          attributes: ["name"], // Inclui apenas o nome da categoria
+        },
+        {
+          model: User,
+          as: "writer",
+          attributes: ["name"], // Inclui apenas o nome do autor
+        },
+      ],
+      attributes: [
+        "title",
+        "description",
+        "author",
+        "status",
+        "is_free",
+        "cover_url",
+        "file_url",
+      ],
+    });
+
+    // Verifica se o livro foi encontrado
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    // Retorna os dados filtrados do livro com as relações
+    const bookData = {
+      title: book.title,
+      description: book.description,
+      author: book.author,
+      category: book.category ? book.category.name : null,
+      status: book.status,
+      is_free: book.is_free,
+      cover_url: book.cover_url,
+      file_url: book.file_url,
+    };
+
+    res.json(bookData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   searchBooks,
   createBook,
@@ -419,4 +695,8 @@ module.exports = {
   sendRating,
   sendLike,
   getBookForReading,
+  deleteBook,
+  editBook,
+  getAllBooks,
+  getBookById,
 };

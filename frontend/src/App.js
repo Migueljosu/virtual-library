@@ -17,7 +17,7 @@ import ResetPassword from "./components/ResetPassword"; // Importe o componente 
 import ActivateAccount from "./components/ActivateAccount";
 import BookDetails from "./components/BookDetails";
 import ReaderPage from './pages/ReaderPage';
-
+import EditBook from './components/BookEdit'; // Importe seu componente de edição de livro
 
 const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -134,8 +134,8 @@ const App = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to="/login" />} />
           <Route path="/reader" element={<ReaderPage />} />
-
-        </Routes>
+          <Route path="/edit-book/:id" element={<EditBook />} />
+          </Routes>
         <ScrollToTopButton />
         <DonationButton />
       </div>
