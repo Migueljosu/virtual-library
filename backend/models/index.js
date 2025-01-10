@@ -11,6 +11,7 @@ const Favorites = require('./favoritesModel');
 const ReadingStatus = require('./readingStatusModel');
 const Testimonial = require('./testimonialModel');
 const ContactUs = require('./contactUsModel');
+const ChatbotMessage = require('./chatbotMessageModel')
 
 // Inicialização dos modelos
 const models = {
@@ -26,6 +27,7 @@ const models = {
   ContactUs,
   Favorites,
   ReadingStatus,
+  ChatbotMessage,
 };
 
 // Configurando as associações entre os modelos

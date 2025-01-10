@@ -1,3 +1,4 @@
+//SideBar
 import React, { useState } from "react";
 import { FaTachometerAlt, FaUsers, FaBook, FaCog, FaSignOutAlt, FaTag } from 'react-icons/fa';
 import Logo from '../assets/images/logo.svg'; // Importe sua logo aqui
@@ -94,7 +95,7 @@ const Sidebar = ({ setActiveTab }) => {
 
       {/* Footer Section */}
       <div className="mt-8 border-t pt-4 text-sm text-center">
-        <p>&copy; 2024 YourCompany</p>
+        <p>&copy; 2025 Virtual Library</p>
         <p>All Rights Reserved</p>
       </div>
     </div>

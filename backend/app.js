@@ -8,6 +8,8 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 const corsOptions = require("./middleware/cors"); // Middleware CORS personalizado
 const path = require("path");
+const chatbotRoutes = require('./routes/chatbot');
+
 require("dotenv").config();
 
 const app = express();
@@ -34,5 +36,6 @@ app.use("/google", googleRoutes);
 app.use("/api", bookRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api", statsRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 module.exports = app;

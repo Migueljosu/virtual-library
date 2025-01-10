@@ -1,16 +1,12 @@
-// middlewares/cors.js
-const cors = require('cors');
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) {
-      return callback(null, true);
-    }
+    if (!origin) return callback(null, true);
 
     const allowedOrigins = [
-      /^http:\/\/192\.168\.\d+\.\d+:\d+$/,
       /^http:\/\/localhost:\d+$/,
-      /^http:\/\/(localhost|\d+\.\d+\.\d+\.\d+):\d+$/,
+      /^http:\/\/192\.168\.\d+\.\d+:\d+$/, // IPs locais
+      /^http:\/\/\d+\.\d+\.\d+\.\d+:\d+$/, // Outros IPs na rede local
     ];
 
     if (allowedOrigins.some((pattern) => pattern.test(origin))) {
