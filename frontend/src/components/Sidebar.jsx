@@ -1,104 +1,155 @@
-//SideBar
 import React, { useState } from "react";
-import { FaTachometerAlt, FaUsers, FaBook, FaCog, FaSignOutAlt, FaTag } from 'react-icons/fa';
-import Logo from '../assets/images/logo.svg'; // Importe sua logo aqui
-import { useNavigate } from 'react-router-dom'; // Alterado para useNavigate
+import {
+  FaTachometerAlt,
+  FaUsers,
+  FaBook,
+  FaCog,
+  FaSignOutAlt,
+  FaTag,
+  FaBars,
+  FaTimes,
+} from "react-icons/fa";
+import Logo from "../assets/images/logo.svg"; // Importe sua logo aqui
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ setActiveTab }) => {
-  const navigate = useNavigate(); // Usando useNavigate para navegação
- const [loadingLogout, setLoadingLogout] = useState(false); // Estado para controlar o loader de logout
+  const navigate = useNavigate();
+  const [loadingLogout, setLoadingLogout] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Estado para controlar o menu hambúrguer
+
   const handleLogout = () => {
-    setLoadingLogout(true); // Ativa o estado de loading
+    setLoadingLogout(true);
 
     setTimeout(() => {
-      localStorage.removeItem("user"); // Remove o usuário do localStorage
-      setLoadingLogout(false); // Desativa o estado de loading
-      window.location.reload(); // Força a atualização da página
-      navigate("/login"); // Redireciona para a página de login após a atualização
-    }, 2000); // Atraso de 2 segundos para mostrar o loader
+      localStorage.removeItem("user");
+      setLoadingLogout(false);
+      window.location.reload();
+      navigate("/login");
+    }, 2000);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
 
   return (
-    <div className="w-64 bg-wood-brown text-white min-h-screen p-6 fixed top-0 left-0 z-10">
-      {/* Logo */}
-      <div className="flex justify-center mb-8">
-        <img src={Logo} alt="Logo" className="h-12 transition-transform transform hover:scale-110" />
+    <>
+      {/* Menu Hamburger */}
+      <div className="lg:hidden flex items-center justify-between p-4 bg-wood-brown text-white fixed top-0 left-0 right-0 z-20">
+        <img src={Logo} alt="Logo" className="h-8" />
+        <button onClick={toggleSidebar} className="text-white focus:outline-none">
+          {isSidebarOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        </button>
       </div>
 
-      {/* Título */}
-      <h2 className="text-2xl font-bold text-center mb-6">Admin Panel</h2>
+      {/* Overlay para fechar o sidebar ao clicar fora */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
+          onClick={closeSidebar}
+        ></div>
+      )}
 
-      {/* Navegação */}
-      <ul className="space-y-6">
-        {/* Dashboard */}
-        <li
-          onClick={() => setActiveTab('dashboard')}
-          className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
-        >
-          <FaTachometerAlt size={20} />
-          <span>Dashboard</span>
-        </li>
+      {/* Sidebar */}
+      <div
+        className={`${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 fixed top-0 left-0 bg-wood-brown text-white min-h-screen p-6 w-64 z-20 transition-transform duration-300`}
+      >
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <img
+            src={Logo}
+            alt="Logo"
+            className="h-12 transition-transform transform hover:scale-110"
+          />
+        </div>
 
-        {/* Users */}
-        <li
-          onClick={() => setActiveTab('users')}
-          className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
-        >
-          <FaUsers size={20} />
-          <span>Users</span>
-        </li>
+        {/* Título */}
+        <h2 className="text-2xl font-bold text-center mb-6">Admin Panel</h2>
 
-        {/* Books */}
-        <li
-          onClick={() => setActiveTab('books')}
-          className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
-        >
-          <FaBook size={20} />
-          <span>Books</span>
-        </li>
+        {/* Navegação */}
+        <ul className="space-y-6">
+          <li
+            onClick={() => {
+              setActiveTab("dashboard");
+              closeSidebar(); // Fecha o sidebar ao clicar
+            }}
+            className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
+          >
+            <FaTachometerAlt size={20} />
+            <span>Dashboard</span>
+          </li>
+          <li
+            onClick={() => {
+              setActiveTab("users");
+              closeSidebar();
+            }}
+            className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
+          >
+            <FaUsers size={20} />
+            <span>Users</span>
+          </li>
+          <li
+            onClick={() => {
+              setActiveTab("books");
+              closeSidebar();
+            }}
+            className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
+          >
+            <FaBook size={20} />
+            <span>Books</span>
+          </li>
+          <li
+            onClick={() => {
+              setActiveTab("publish_books");
+              closeSidebar();
+            }}
+            className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
+          >
+            <FaBook size={20} />
+            <span>Publish Books</span>
+          </li>
+          <li
+            onClick={() => {
+              setActiveTab("Settings");
+              closeSidebar();
+            }}
+            className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
+          >
+            <FaCog size={20} />
+            <span>Settings</span>
+          </li>
+          <li
+            onClick={() => {
+              setActiveTab("CategoryManager");
+              closeSidebar();
+            }}
+            className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
+          >
+            <FaTag size={20} />
+            <span>Category Manager</span>
+          </li>
+          <li
+            onClick={handleLogout}
+            className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white mt-6"
+          >
+            <FaSignOutAlt size={20} />
+            <span>Logout</span>
+          </li>
+        </ul>
 
-        {/* Post Books */}
-        <li
-          onClick={() => setActiveTab('publish_books')}
-          className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
-        >
-          <FaBook size={20} />
-          <span>Publish Books</span>
-        </li>
-
-        {/* Settings */}
-        <li
-          onClick={() => setActiveTab('Settings')}
-          className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
-        >
-          <FaCog size={20} />
-          <span>Settings</span>
-        </li>
-        <li
-          onClick={() => setActiveTab('CategoryManager')}
-          className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white"
-        >
-          <FaTag size={20} />
-          <span>Category Manager</span>
-        </li>
-
-        {/* Logout */}
-        <li
-          onClick={handleLogout}
-          className="flex items-center space-x-4 cursor-pointer p-3 rounded-lg transition-all transform hover:bg-gradient-to-r hover:from-brown-500 hover:to-brown-700 hover:scale-105 hover:text-white mt-6"
-        >
-          <FaSignOutAlt size={20} />
-          <span>Logout</span>
-        </li>
-      </ul>
-
-      {/* Footer Section */}
-      <div className="mt-8 border-t pt-4 text-sm text-center">
-        <p>&copy; 2025 Virtual Library</p>
-        <p>All Rights Reserved</p>
+        {/* Footer */}
+        <div className="mt-8 border-t pt-4 text-sm text-center">
+          <p>&copy; 2024 Virtual Library</p>
+          <p>All Rights Reserved</p>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

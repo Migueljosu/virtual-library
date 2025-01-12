@@ -29,13 +29,13 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-bold mb-6 text-center text-wood-brown">
+    <div className="p-4 sm:p-6 mt-20 sm:mt-12 mx-auto max-w-screen-lg text-center">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-wood-brown">
         Dashboard
       </h2>
 
       {/* Notificação de Atividade */}
-      <div className="absolute top-6 right-6">
+      <div className="absolute top-20 right-6">
         <button onClick={toggleNotifications} className="relative">
           <FaBell size={30} className="text-wood-brown" />
           <span className="absolute top-0 right-0 text-xs text-white bg-red-600 rounded-full px-2">
@@ -46,7 +46,7 @@ const Dashboard = () => {
 
       {/* Caixa de Notificação */}
       {showNotifications && (
-        <div className="absolute top-16 right-6 bg-white shadow-lg p-4 rounded-lg w-96 z-10">
+        <div className="absolute top-16 right-6 bg-white shadow-lg p-4 rounded-lg w-full sm:w-96 z-10">
           <h4 className="text-xl font-semibold text-wood-brown mb-4">
             Recent Notifications
           </h4>
@@ -79,7 +79,7 @@ const Dashboard = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-16">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 sm:mt-16 justify-center items-center">
         <StatsCard
           title="Total Users"
           value={stats.totalUsers}

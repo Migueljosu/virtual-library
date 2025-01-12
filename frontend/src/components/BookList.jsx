@@ -15,7 +15,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
-  const [viewMode, setViewMode] = useState("table");
+  const [viewMode, setViewMode] = useState("grid"); // Definido como "grid" por padrão
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -30,6 +30,22 @@ const BookList = () => {
         console.error("Erro ao carregar os livros:", error);
         toast.error("Erro ao carregar os livros!");
       });
+
+    // Ajuste do viewMode para grid em telas pequenas
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setViewMode("grid"); // Definir como "grid" para telas menores
+      }
+    };
+
+    // Inicializa com o tamanho da tela
+    handleResize();
+
+    // Adiciona o listener de resize
+    window.addEventListener("resize", handleResize);
+
+    // Limpeza do listener ao desmontar o componente
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const handleDelete = (bookId) => {
@@ -66,7 +82,7 @@ const BookList = () => {
   return (
     <div className="p-6 bg-white shadow-md rounded-lg">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-[#3E2A47] mb-4 md:mb-0">
+        <h2 className="text-3xl font-bold text-[#3E2A47] mb-4 md:mb-0 mt-10">
           Books
         </h2>
         <div className="flex items-center space-x-4">
@@ -200,7 +216,7 @@ const BookList = () => {
           </tbody>
         </table>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredBooks.map((book) => (
             <div
               key={book.id} // Alterado para usar `id` em vez de `_id`

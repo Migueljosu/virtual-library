@@ -22,11 +22,11 @@ const AdminPage = () => {
 
   return (
     <div className="flex">
-      {/* Sidebar é fixo */}
+      {/* Sidebar */}
       <Sidebar setActiveTab={setActiveTab} />
-      
-      {/* Conteúdo à direita do sidebar com margem esquerda */}
-      <div className="flex-1 p-6 ml-64"> {/* A margem esquerda de 64 é para deixar espaço para o sidebar fixo */}
+
+      {/* Conteúdo principal */}
+      <div className={`flex-1 p-6 transition-all duration-300 ${activeTab === 'dashboard' ? 'ml-64' : 'ml-0 lg:ml-64'}`}>
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'users' && <UserList />}
         {activeTab === 'books' && <BookList />}

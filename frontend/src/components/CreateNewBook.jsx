@@ -118,7 +118,7 @@ const CreateNewBook = () => {
 
   return (
     <form onSubmit={handleCreate} className="bg-white p-6 shadow-md rounded-lg">
-      <h2 className="text-xl font-semibold text-wood-brown mb-4">
+      <h2 className="text-xl font-semibold text-wood-brown mb-4 mt-10">
         Create a New Book
       </h2>
 
