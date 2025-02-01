@@ -17,7 +17,7 @@ const createBook = async (req, res) => {
     // Verifique se os arquivos foram enviados
     if (!req.files || !req.files.file || !req.files.coverImage) {
       return res.status(400).json({ error: "Arquivo e capa são obrigatórios" });
-    }f
+    }
 
     const {
       title,

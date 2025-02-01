@@ -17,6 +17,7 @@ const BookList = () => {
   const [books, setBooks] = useState([]);
   const [viewMode, setViewMode] = useState("grid"); // Definido como "grid" por padrão
   const [searchTerm, setSearchTerm] = useState("");
+  const BASE_URL = "http://localhost:5000"; // Ajuste para a URL correta
 
   useEffect(() => {
     // Requisição para pegar os livros da API
@@ -159,7 +160,7 @@ const BookList = () => {
               >
                 <td className="px-6 py-4 border-b">
                   <img
-                    src={book.coverUrl}
+                    src={`${BASE_URL}${book.coverUrl}`}
                     alt={book.title}
                     className="w-16 h-24 object-cover rounded"
                   />
@@ -223,10 +224,11 @@ const BookList = () => {
               className="bg-[#F5E0C1] p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
             >
               <img
-                src={book.coverUrl}
+                src={`${BASE_URL}${book.coverUrl}`}
                 alt={book.title}
                 className="w-full h-48 object-cover rounded mb-4"
               />
+
               <h3 className="text-xl font-bold text-[#3E2A47]">{book.title}</h3>
               <p className="text-[#3E2A47]">{book.author}</p>
               <p className="text-[#3E2A47]">{book.category}</p>
