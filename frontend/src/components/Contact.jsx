@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FaFacebook,
   FaTwitter,
@@ -8,10 +8,47 @@ import {
   FaPhone,
   FaMapMarkerAlt,
 } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify"; // Importando Toastify
+import "react-toastify/dist/ReactToastify.css"; // Importando o CSS
+import axiosInstance from "../utils/axiosInstance";
 
-const Contact = () => {
+const Contact = ({ user }) => {
+  const [formData, setFormData] = useState({
+    name: user ? user.name : "",
+    email: user ? user.email : "",
+    subject: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const config = {
+        headers: {
+          Authorization: user ? `Bearer ${localStorage.getItem("token")}` : "",
+        },
+      };
+
+      const { data } = await axiosInstance.post(
+        "/api/contact/send",
+        formData,
+        config
+      );
+
+      toast.success(data.message);
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error sending message.");
+    }
+  };
   return (
     <section id="contact" className="bg-white py-16 px-4">
+      <ToastContainer /> {/* Componente do Toastify */}
       <div className="container mx-auto">
         {/* Título da seção */}
         <div className="text-center mb-12">
@@ -71,11 +108,11 @@ const Contact = () => {
             <div className="space-y-4">
               <div className="flex items-center">
                 <FaMapMarkerAlt className="text-wood-brown text-xl mr-4" />
-                <p>123 Library Lane, Knowledge City, World</p>
+                <p>123 Library Lane, Luanda, Angola</p>
               </div>
               <div className="flex items-center">
                 <FaPhone className="text-wood-brown text-xl mr-4" />
-                <p>+1 234 567 890</p>
+                <p>+244 946 567 890</p>
               </div>
               <div className="flex items-center">
                 <FaEnvelope className="text-wood-brown text-xl mr-4" />
@@ -89,76 +126,43 @@ const Contact = () => {
             <h3 className="text-2xl font-semibold text-wood-brown mb-6">
               Send Us a Message
             </h3>
-            <form className="space-y-6">
-              {/* Nome */}
-              <div className="relative">
-                <input
-                  type="text"
-                  id="name"
-                  className="peer block w-full rounded-md bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-wood-brown"
-                  placeholder=" "
-                  required
-                />
-                <label
-                  htmlFor="name"
-                  className="absolute left-4 top-3 text-gray-600 text-sm transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-wood-brown"
-                >
-                  Name
-                </label>
-              </div>
-
-              {/* E-mail */}
-              <div className="relative">
-                <input
-                  type="email"
-                  id="email"
-                  className="peer block w-full rounded-md bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-wood-brown"
-                  placeholder=" "
-                  required
-                />
-                <label
-                  htmlFor="email"
-                  className="absolute left-4 top-3 text-gray-600 text-sm transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-wood-brown"
-                >
-                  Email
-                </label>
-              </div>
-
-              {/* Assunto */}
-              <div className="relative">
-                <input
-                  type="text"
-                  id="subject"
-                  className="peer block w-full rounded-md bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-wood-brown"
-                  placeholder=" "
-                  required
-                />
-                <label
-                  htmlFor="subject"
-                  className="absolute left-4 top-3 text-gray-600 text-sm transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-wood-brown"
-                >
-                  Subject
-                </label>
-              </div>
-
-              {/* Mensagem */}
-              <div className="relative">
-                <textarea
-                  id="message"
-                  rows="4"
-                  className="peer block w-full rounded-md bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-wood-brown"
-                  placeholder=" "
-                  required
-                ></textarea>
-                <label
-                  htmlFor="message"
-                  className="absolute left-4 top-3 text-gray-600 text-sm transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-wood-brown"
-                >
-                  Message
-                </label>
-              </div>
-
-              {/* Botão de enviar */}
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Name"
+                className="block w-full p-3 border border-gray-300 rounded"
+                required
+              />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email"
+                className="block w-full p-3 border border-gray-300 rounded"
+                required
+              />
+              <input
+                type="text"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                placeholder="Subject"
+                className="block w-full p-3 border border-gray-300 rounded"
+                required
+              />
+              <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                rows="4"
+                placeholder="Message"
+                className="block w-full p-3 border border-gray-300 rounded"
+                required
+              />
               <button
                 type="submit"
                 className="w-full py-2 px-4 bg-wood-brown text-white font-semibold rounded-md shadow hover:bg-black transition duration-300"

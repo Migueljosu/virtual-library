@@ -106,7 +106,7 @@ const ReaderDashboard = () => {
                 : "hidden"
             } lg:flex lg:space-x-8 lg:static lg:bg-transparent lg:flex-row lg:space-y-0`}
           >
-            {[ 
+            {[
               { id: "statistics", label: "Statistics" },
               { id: "reader-books", label: "Reader Books" },
               { id: "recommended-books", label: "Recommended Books" },
@@ -153,7 +153,13 @@ const ReaderDashboard = () => {
           </h2>
           <ReaderStats />
         </section>
-
+        {/* Barra de Pesquisa */}
+        <section id="search" className="mb-8">
+          <h2 className="text-xl font-semibold text-wood-brown mb-4">
+            Search for Books
+          </h2>
+          <SearchBar />
+        </section>
         {/* Seção de Livros do Leitor */}
         <section id="reader-books" className="mb-8">
           <h2 className="text-xl font-semibold text-wood-brown mb-4">
@@ -184,14 +190,6 @@ const ReaderDashboard = () => {
             Upcoming Events
           </h2>
           <Events />
-        </section>
-
-        {/* Barra de Pesquisa */}
-        <section id="search" className="mb-8">
-          <h2 className="text-xl font-semibold text-wood-brown mb-4">
-            Search for Books
-          </h2>
-          <SearchBar />
         </section>
 
         {/* Seção de Contato */}

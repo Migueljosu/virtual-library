@@ -6,13 +6,13 @@ import {
   FaStar,
   FaRegStar,
   FaThumbsUp,
-  FaRegThumbsUp,
-  FaHeart,
-  FaRegHeart,
-  FaSmile,
   FaRegSmile,
+  FaBookmark,
+  FaCheckCircle,
+  FaArrowLeft,
 } from "react-icons/fa";
-import { toast } from "react-toastify"; // Para mensagens flash
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const BookDetails = () => {
   const { bookId } = useParams();
@@ -28,6 +28,7 @@ const BookDetails = () => {
   const [interactionType, setInteractionType] = useState("");
   const [score, setScore] = useState(0);
   const navigate = useNavigate(); // Hook para navegação
+
   useEffect(() => {
     const fetchBookDetails = async () => {
       try {
@@ -35,7 +36,6 @@ const BookDetails = () => {
         setBook(response.data);
         setReviews(response.data.reviews || []);
         setLikeCount(response.data.likes || 0);
-        console.log(response.data);
       } catch (error) {
         console.error("Erro ao carregar detalhes do livro:", error);
       } finally {
@@ -141,6 +141,12 @@ const BookDetails = () => {
   }
   const handleReadBook = async () => {
     try {
+      // Enviar a requisição para atualizar o status para "in_progress"
+      await axiosInstance.post("/api/reading-status", {
+        bookId: book.id,
+        status: "in_progress", // Status do livro
+      });
+
       // Faz a requisição para o backend para obter o livro
       const response = await axiosInstance.get(`/api/${bookId}/read`);
 
@@ -154,6 +160,32 @@ const BookDetails = () => {
     } catch (error) {
       console.error("Erro ao iniciar a leitura:", error);
       toast.error("Erro ao iniciar a leitura.");
+    }
+  };
+
+  const handleFinishBook = async () => {
+    try {
+      // Enviar a requisição para atualizar o status para "in_progress"
+      await axiosInstance.post("/api/reading-status", {
+        bookId: book.id,
+        status: "completed", // Status do livro
+      });
+      toast.success("Livro atualizado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar o status de leitura:", error);
+      toast.error("Erro ao atualizar o status de leitura.");
+    }
+  };
+  const handleFavoriteBook = async () => {
+    try {
+      // Enviar a requisição para adicionar livro como favorito
+      await axiosInstance.post("/api/favorite", {
+        book_id: book.id, // Mude para 'book_id' para coincidir com o que o backend espera
+      });
+      toast.success("Livro adicionado aos favoritos!");
+    } catch (error) {
+      console.error("Erro ao adicionar livro aos favoritos:", error);
+      toast.error("Erro ao adicionar livro aos favoritos.");
     }
   };
 
@@ -172,7 +204,42 @@ const BookDetails = () => {
               <h1 className="text-white text-3xl font-bold">{book.title}</h1>
             </div>
           </div>
-          <div className="flex items-center justify-end mt-4">
+          <div className="flex items-center justify-end mt-4 space-x-4">
+            <button
+              onClick={() => navigate(-1)} // Volta para a rota anterior
+              className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+            >
+              <FaArrowLeft className="mr-2" />{" "}
+              {/* Ícone de seta para a esquerda */}
+              <span>Voltar</span>
+            </button>
+            {/* Botão de "Terminei de ler este livro" com ícone e hover */}
+            <button
+              onClick={handleFinishBook}
+              className="group flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-500 delay-300"
+            >
+              <FaCheckCircle className="mr-2" />
+              <span className="hidden group-hover:inline">
+                {" "}
+                {/* Exibe o texto ao passar o mouse */}
+                Terminei de ler este livro
+              </span>
+            </button>
+
+            {/* Botão de "Adicionar aos Favoritos" com hover e animação */}
+            <button
+              onClick={handleFavoriteBook}
+              className="group flex items-center bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition duration-500 delay-300"
+            >
+              <FaBookmark className="mr-2" />
+              <span className="hidden group-hover:inline">
+                {" "}
+                {/* Exibe o texto ao passar o mouse */}
+                Add to Favorites
+              </span>
+            </button>
+
+            {/* Botão "Ler este livro" */}
             <button
               onClick={handleReadBook}
               className="flex items-center bg-wood-brown text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-300 transition"
@@ -297,6 +364,7 @@ const BookDetails = () => {
               </button>
             </div>
           </div>
+          <ToastContainer />
         </div>
       </section>
       <Footer />

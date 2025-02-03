@@ -12,6 +12,7 @@ const {
   editBook,
   deleteBook,
   getBookById,
+  getRecommendedBooks,
 } = require("../controllers/bookController");
 const router = express.Router();
 
@@ -41,5 +42,7 @@ router.get("/:bookId/read", getBookForReading);
 router.put("/books/edit/:id", editBook);
 router.delete("/books/delete/:id", deleteBook);
 router.get('/books/:id', getBookById);
+// Rota para obter todos os livros recomendados
+router.get('/recommended', getRecommendedBooks);
 
 module.exports = router;

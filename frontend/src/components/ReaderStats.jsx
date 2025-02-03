@@ -1,8 +1,31 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FaBook, FaBookmark, FaHourglassStart } from "react-icons/fa";
 import { motion } from "framer-motion"; // Usaremos o Framer Motion para animações
+import axiosInstance from "../utils/axiosInstance";
 
 const ReaderStats = () => {
+  // Definindo os estados para armazenar as estatísticas
+  const [stats, setStats] = useState({
+    completedBooksCount: 0,
+    inProgressBooksCount: 0,
+    favoriteBooksCount: 0,
+  });
+
+  // Função para buscar as estatísticas do usuário
+  const fetchStatistics = async () => {
+    try {
+      const response = await axiosInstance.get("/api/user/statistics");
+      setStats(response.data); // Atualiza o estado com os dados da API
+    } catch (error) {
+      console.error("Erro ao obter as estatísticas:", error);
+    }
+  };
+
+  // Chama a função para buscar as estatísticas quando o componente for montado
+  useEffect(() => {
+    fetchStatistics();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {/* Estátistica de Livros Lidos */}
@@ -16,7 +39,7 @@ const ReaderStats = () => {
           <FaBook className="text-4xl text-wood-brown" />
           <h3 className="text-xl font-semibold text-wood-brown">Books Read</h3>
         </div>
-        <p className="text-4xl font-bold text-wood-brown mt-4">15</p>
+        <p className="text-4xl font-bold text-wood-brown mt-4">{stats.completedBooksCount}</p>
       </motion.div>
 
       {/* Estátistica de Livros em Progresso */}
@@ -30,7 +53,7 @@ const ReaderStats = () => {
           <FaHourglassStart className="text-4xl text-wood-brown" />
           <h3 className="text-xl font-semibold text-wood-brown">Books in Progress</h3>
         </div>
-        <p className="text-4xl font-bold text-wood-brown mt-4">3</p>
+        <p className="text-4xl font-bold text-wood-brown mt-4">{stats.inProgressBooksCount}</p>
       </motion.div>
 
       {/* Estátistica de Livros Favoritos */}
@@ -44,7 +67,7 @@ const ReaderStats = () => {
           <FaBookmark className="text-4xl text-wood-brown" />
           <h3 className="text-xl font-semibold text-wood-brown">Books Favorited</h3>
         </div>
-        <p className="text-4xl font-bold text-wood-brown mt-4">7</p>
+        <p className="text-4xl font-bold text-wood-brown mt-4">{stats.favoriteBooksCount}</p>
       </motion.div>
     </div>
   );

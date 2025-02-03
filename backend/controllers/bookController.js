@@ -686,6 +686,109 @@ const getBookById = async (req, res) => {
   }
 };
 
+const getRecommendedBooks = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const { count, rows: books } = await Book.findAndCountAll({
+      include: [
+        {
+          model: Recommendation,
+          as: "recommendations",
+          required: true,
+          include: [{ model: User, as: "user", attributes: ["name"] }],
+        },
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name"],
+        },
+        {
+          model: User,
+          as: "writer",
+          attributes: ["id", "name"],
+        },
+        {
+          model: Review,
+          as: "reviews",
+        },
+      ],
+      limit: parseInt(limit),
+      offset,
+      order: [
+        [{ model: Recommendation, as: "recommendations" }, "score", "DESC"],
+      ],
+    });
+
+    if (count === 0) {
+      return res.status(404).json({ message: "No recommended books found" });
+    }
+
+    const bookDetails = await Promise.all(
+      books.map(async (book) => {
+        const filePath = path.join(
+          __dirname,
+          "..",
+          "uploads",
+          book.file_url.replace(/^\/uploads/, "")
+        );
+
+        let pageCount = 0;
+
+        if (fs.existsSync(filePath)) {
+          try {
+            const pdfData = await pdfParse(fs.readFileSync(filePath));
+            pageCount = pdfData.numpages || 0;
+          } catch (error) {
+            console.error(
+              `Error parsing PDF for book "${book.title}":`,
+              error.message
+            );
+          }
+        }
+
+        const averageRating =
+          book.reviews.length > 0
+            ? book.reviews.reduce((sum, review) => sum + review.rating, 0) /
+              book.reviews.length
+            : 0;
+
+        return {
+          id: book.id,
+          title: book.title,
+          description: book.description,
+          author: book.author,
+          publicationDate: book.publication_date,
+          price: book.price,
+          isFree: book.is_free,
+          fileUrl: book.file_url,
+          coverUrl: book.cover_url,
+          category: book.category?.name || "Uncategorized",
+          writer: book.writer?.name || "Unknown",
+          pageCount,
+          recommendations: book.recommendations.map((rec) => ({
+            id: rec.id,
+            user: rec.user?.name || "Anonymous",
+            score: rec.score,
+          })),
+          averageRating: averageRating.toFixed(2),
+        };
+      })
+    );
+
+    res.status(200).json({
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(count / limit),
+      totalBooks: count,
+      books: bookDetails,
+    });
+  } catch (error) {
+    console.error("Error fetching recommended books:", error.message);
+    res.status(500).json({ message: "Failed to fetch recommended books." });
+  }
+};
+
 module.exports = {
   searchBooks,
   createBook,
@@ -699,4 +802,5 @@ module.exports = {
   editBook,
   getAllBooks,
   getBookById,
+  getRecommendedBooks,
 };
