@@ -1,61 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import { Link } from "react-router-dom";  // Importação do React Router para navegação
-
-// Importe das imagens
-import book1 from "../assets/images/book1.png";
-import book2 from "../assets/images/book2.jpg";
-import book3 from "../assets/images/book3.png";
+import { Link } from "react-router-dom";
+import axiosInstance from "../utils/axiosInstance"; // Certifique-se de que está importado corretamente
+import "animate.css";
 
 const PopularBooks = () => {
-  const books = [
-    { title: "The Great Gatsby", author: "F. Scott Fitzgerald", imgSrc: book2 },
-    { title: "1984", author: "George Orwell", imgSrc: book3 },
-    { title: "To Kill a Mockingbird", author: "Harper Lee", imgSrc: book1 },
-    { title: "Pride and Prejudice", author: "Jane Austen", imgSrc: book2 },
-    { title: "The Catcher in the Rye", author: "J.D. Salinger", imgSrc: book3 },
-    { title: "Moby Dick", author: "Herman Melville", imgSrc: book1 },
-    { title: "War and Peace", author: "Leo Tolstoy", imgSrc: book2 },
-    { title: "The Odyssey", author: "Homer", imgSrc: book3 },
-    { title: "The Odyssey", author: "Homer", imgSrc: book1 },
-  ];
-
+  const [books, setBooks] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animationClass, setAnimationClass] = useState("animate__fadeInRight");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimationClass("animate__fadeOutLeft");
-      setTimeout(() => {
-        setCurrentIndex((prevIndex) =>
-          prevIndex + 1 >= books.length ? 0 : prevIndex + 1
-        );
-        setAnimationClass("animate__fadeInRight");
-      }, 500); // Sincroniza com a animação de saída
-    }, 5000);
+    const fetchRecommendedBooks = async () => {
+      try {
+        const response = await axiosInstance.get("/api/recommended");
+        if (response.data.books) {
+          setBooks(response.data.books);
+        }
+      } catch (error) {
+        console.error("Error fetching recommended books:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearInterval(interval);
+    fetchRecommendedBooks();
+  }, []);
+
+  useEffect(() => {
+    if (books.length > 0) {
+      const interval = setInterval(() => {
+        setAnimationClass("animate__fadeOutLeft");
+        setTimeout(() => {
+          setCurrentIndex((prevIndex) =>
+            prevIndex + 1 >= books.length ? 0 : prevIndex + 1
+          );
+          setAnimationClass("animate__fadeInRight");
+        }, 500);
+      }, 5000);
+
+      return () => clearInterval(interval);
+    }
   }, [books.length]);
 
-  const goToNext = () => {
-    setAnimationClass("animate__fadeOutLeft");
-    setTimeout(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex + 1 >= books.length ? 0 : prevIndex + 1
-      );
-      setAnimationClass("animate__fadeInRight");
-    }, 500);
-  };
-
-  const goToPrev = () => {
-    setAnimationClass("animate__fadeOutRight");
-    setTimeout(() => {
-      setCurrentIndex(
-        currentIndex - 1 < 0 ? books.length - 1 : currentIndex - 1
-      );
-      setAnimationClass("animate__fadeInLeft");
-    }, 500);
-  };
+  if (loading) {
+    return <p className="text-center text-gray-600">Loading books...</p>;
+  }
 
   return (
     <section className="py-16 px-4">
@@ -63,20 +53,18 @@ const PopularBooks = () => {
         Popular Books
       </h2>
 
-      {/* Carrossel de livros */}
       <div className="relative">
         <div className="flex overflow-hidden">
           {books.slice(currentIndex, currentIndex + 3).map((book, index) => (
             <div
               key={index}
-              className="w-full sm:w-1/3 px-2 transition-all duration-500 ease-in-out"
+              className={`w-full sm:w-1/3 px-2 transition-all duration-500 ease-in-out animate__animated ${animationClass}`}
             >
-              <div className={`bg-transparent p-6 rounded-lg transform transition duration-500 ease-in-out animate__animated ${animationClass}`}>
-                {/* Exibe a capa do livro como uma imagem normal */}
+              <div className="bg-transparent p-6 rounded-lg">
                 <img
-                  src={book.imgSrc}
+                  src={book.coverUrl}
                   alt={book.title}
-                  className="w-full h-80 object-contain rounded-t-lg"  // Definindo largura e altura fixas
+                  className="w-full h-80 object-contain rounded-t-lg"
                 />
                 <div className="p-4">
                   <h3 className="text-xl font-semibold">{book.title}</h3>
@@ -88,7 +76,7 @@ const PopularBooks = () => {
         </div>
       </div>
 
-      {/* Indicadores de navegação */}
+      {/* Indicadores de Navegação */}
       <div className="flex justify-center mt-8 space-x-2">
         {books.map((_, index) => (
           <button
@@ -107,26 +95,26 @@ const PopularBooks = () => {
         ))}
       </div>
 
-      {/* Navegação para próxima/voltar */}
+      {/* Botões de navegação */}
       <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center px-4">
         <FaArrowLeft
-          onClick={goToPrev}
+          onClick={() =>
+            setCurrentIndex(currentIndex - 1 < 0 ? books.length - 1 : currentIndex - 1)
+          }
           className="text-white cursor-pointer"
           size={30}
         />
         <FaArrowRight
-          onClick={goToNext}
+          onClick={() =>
+            setCurrentIndex(currentIndex + 1 >= books.length ? 0 : currentIndex + 1)
+          }
           className="text-white cursor-pointer"
           size={30}
         />
       </div>
 
-      {/* Link para ver todos os livros */}
       <div className="text-center mt-8">
-        <Link
-          to="/all-books" // Substitua pelo caminho da página que lista todos os livros
-          className="text-lg text-wood-brown hover:underline"
-        >
+        <Link to="/all-books" className="text-lg text-wood-brown hover:underline">
           See All Popular Books
         </Link>
       </div>
